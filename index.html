@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2563EB">
+<title>ShopOnlineUg | Best Online Shopping Mall</title>
+<meta name="description" content="Buy Phones, Electronics, TVs, Appliance, Fashion &amp; more from top brands · Best prices in Uganda · Order now and enjoy pay on delivery.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%232563EB' d='M50 5 L95 22 L95 62 L50 95 L5 62 L5 22 Z'/%3E%3Ctext x='50' y='62' font-family='Arial' font-size='50' font-weight='bold' fill='%23fff' text-anchor='middle'>S</text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="jm">
+
+  <div class="prog" id="progBar" aria-hidden="true"></div>
+
+  <article class="cookie" id="cookieBanner">
+    <div class="cookie-in">
+      <div class="cookie-txt">
+        <h2>This website uses cookies</h2>
+        <p>We use cookies to personalise content and ads, to provide social media features and to analyse our traffic. Read more on our <a href="#/info/Cookie%20notice">Privacy and Cookie notice</a>.</p>
+      </div>
+      <button class="btn _prim" id="cookieOk">Accept cookies</button>
+    </div>
+  </article>
+
+  <div class="topbar">
+    <div class="container topbar-in">
+      <span class="topbar-loc">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        Deliver to <b id="topLoc">Kampala</b>
+      </span>
+      <nav class="topbar-links">
+        <a href="#/info/Store%20Locator">Store Locator</a>
+        <a href="#/orders" data-route="/orders">Track Order</a>
+        <a href="#/wish" data-route="/wish">Wishlist (<b id="wishCount">0</b>)</a>
+        <a href="#/orders" data-route="/orders">My Orders</a>
+        <a href="#/info/Help%20%26%20Contact">Help &amp; Contact</a>
+        <a href="#/sell">Sell on ShopOnlineUg</a>
+        <a href="#/vendor">Vendor hub</a>
+        <a href="#/driver">Rider portal</a>
+        <a href="#/mailbox" id="mailLink">Mailbox (<b id="mailCount">0</b>)</a>
+        <a href="#/info/Payment%20methods">Pay Methods</a>
+        <a href="#/"><img class="min-flag" src="img/flag.svg" alt=""> <span data-site-name>ShopOnlineUg</span></a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <header class="mst">
+    <div class="container mst-in">
+      <a class="logo" href="#/" aria-label="ShopOnlineUg">
+        <svg viewBox="0 0 200 30" width="200" height="30">
+          <defs>
+            <linearGradient id="lg" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#1D4ED8"/>
+            </linearGradient>
+          </defs>
+          <text x="0" y="23" font-family="Ubuntu, Arial, sans-serif" font-size="21" font-weight="700" fill="url(#lg)" data-site-name>ShopOnlineUg</text>
+          <rect x="168" y="6.5" width="29" height="16" rx="4" fill="#2563EB"/>
+          <text x="182.5" y="18.5" font-family="Ubuntu, Arial, sans-serif" font-size="10.5" font-weight="700" fill="#fff" text-anchor="middle">UG</text>
+        </svg>
+      </a>
+
+<form class="search" id="searchForm" role="search">
+          <div class="s-wrap">
+            <input id="searchInput" type="text" placeholder="Search products, brands and categories" autocomplete="off">
+            <div class="suggest" id="suggest" hidden></div>
+          </div>
+          <button type="submit" aria-label="Search">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </button>
+      </form>
+
+      <div class="ci-right">
+<div class="ci-item loc-wrap" id="locBox" tabindex="0">
+        <div class="ci-label">Deliver to</div>
+        <div class="ci-value"><b id="locName">Uganda</b>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="loc-pop" id="locPop" hidden>
+          <div class="loc-h">Choose your location</div>
+          <div class="loc-search"><input id="locInput" type="text" placeholder="Search your city"></div>
+          <ul class="loc-list" id="locList"></ul>
+        </div>
+      </div>
+        <div class="ci-item" id="acctBox">
+          <div class="ci-label">Hi, Sign in</div>
+          <div class="ci-value"><b>Account</b>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+        <a class="ci-item" href="#/info/Help%20Centre">
+          <div class="ci-label">Help</div>
+          <div class="ci-value"><b>Help Centre</b>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </a>
+        <a class="ci-item cart" href="#" id="cartLink">
+          <span class="cart-ic">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="20" r="1.6"/><circle cx="17" cy="20" r="1.6"/><path d="M3 4h2l2.4 11.2a1.5 1.5 0 0 0 1.5 1.2h7.9a1.5 1.5 0 0 0 1.5-1.2L20 8H6"/></svg>
+            <span class="cart-badge" id="cartCount">0</span>
+          </span>
+          <span class="cart-col">
+            <span class="ci-label">Cart</span>
+            <span class="ci-value"><b>Cart</b></span>
+          </span>
+        </a>
+      </div>
+    </div>
+
+    <nav class="nav-sections">
+      <div class="container nav-in">
+        <button class="allcat" id="allcatBtn" type="button">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <span>Full Categories</span>
+          <svg class="chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <ul class="menu" id="mainMenu">
+          <li><a href="#/r/super">Supermarket</a></li>
+          <li class="has-sub">
+            <a href="#/r/phones">Phones &amp; Tablets</a>
+            <div class="sub">
+              <a href="#/s/apple">Smartphones</a><a href="#/s/itel">Feature Phones</a>
+              <a href="#/s/tablet">Tablets</a><a href="#/r/phones">Accessories</a><a href="#/r/phones">SIM &amp; Top-Up</a>
+            </div>
+          </li>
+          <li class="has-sub">
+            <a href="#/r/tv">Electronics</a>
+            <div class="sub">
+              <a href="#/s/samsung">Televisions</a><a href="#/s/soundbar">Audio</a>
+              <a href="#/s/camera">Cameras</a><a href="#/s/playstation">Gaming</a><a href="#/r/tv">Smart Home</a>
+            </div>
+          </li>
+          <li class="has-sub">
+            <a href="#/r/fashion">Fashion</a>
+            <div class="sub">
+              <a href="#/r/fashion">Men&apos;s Fashion</a><a href="#/r/fashion">Women&apos;s Fashion</a>
+              <a href="#/r/fashion">Shoes</a><a href="#/r/fashion">Bags</a><a href="#/r/fashion">Jewellery</a>
+            </div>
+          </li>
+          <li class="has-sub">
+            <a href="#/r/home">Home &amp; Office</a>
+            <div class="sub">
+              <a href="#/r/home">Furniture</a><a href="#/r/home">Kitchen</a>
+              <a href="#/r/home">Bedding</a><a href="#/r/home">Appliances</a>
+            </div>
+          </li>
+          <li><a href="#/r/beauty">Health &amp; Beauty</a></li>
+          <li><a href="#/r/computing">Computing</a></li>
+          <li><a href="#/r/sport">Sporting Goods</a></li>
+          <li><a href="#/r/toys">Baby Products</a></li>
+          <li><a href="#/r/toys">Toys &amp; Games</a></li>
+          <li><a href="#/r/games">Games &amp; Consoles</a></li>
+          <li><a href="#/r/other">Other Categories</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="sheet-ov" id="catOv" hidden></div>
+    <div class="catpanel" id="catPanel">
+      <div class="sheet-handle"></div>
+      <div class="container catpanel-in">
+        <div class="cat-col">
+          <h4>Phones &amp; Tablets</h4>
+          <a href="#/r/phones">Smartphones</a><a href="#/r/phones">Feature Phones</a><a href="#/r/phones">Tablets</a><a href="#/r/phones">Mobile Accessories</a><a href="#/r/phones">SIM &amp; Top-Up</a>
+        </div>
+        <div class="cat-col">
+          <h4>Electronics</h4>
+          <a href="#/r/tv">Televisions</a><a href="#/r/tv">Audio</a><a href="#/r/tv">Cameras</a><a href="#/r/games">Gaming</a><a href="#/r/home">Smart Home</a><a href="#/r/phones">Wearables</a>
+        </div>
+        <div class="cat-col">
+          <h4>Home, Furniture &amp; Appliances</h4>
+          <a href="#/r/home">Furniture</a><a href="#/r/home">Kitchen</a><a href="#/r/home">Bedding</a><a href="#/r/home">Appliances</a><a href="#/r/home">Storage</a><a href="#/r/home">Lighting</a>
+        </div>
+        <div class="cat-col">
+          <h4>Fashion</h4>
+          <a href="#/r/fashion">Men&apos;s Fashion</a><a href="#/r/fashion">Women&apos;s Fashion</a><a href="#/r/fashion">Kid&apos;s Fashion</a><a href="#/r/fashion">Shoes</a><a href="#/r/fashion">Bags</a><a href="#/r/fashion">Accessories</a>
+        </div>
+        <div class="cat-col">
+          <h4>Health &amp; Beauty</h4>
+          <a href="#/r/beauty">Skin Care</a><a href="#/r/beauty">Hair Care</a><a href="#/r/beauty">Makeup</a><a href="#/r/beauty">Perfumes</a><a href="#/r/beauty">Personal Care</a><a href="#/r/beauty">Medical Supplies</a>
+        </div>
+        <div class="cat-col">
+          <h4>Shopping by</h4>
+          <a href="#/r/super">Supermarket</a><a href="#/r/computing">Computing</a><a href="#/r/sport">Sporting Goods</a><a href="#/r/home">Baby Products</a><a href="#/r/toys">Toys &amp; Games</a><a href="#/r/other">Other Categories</a>
+        </div>
+        <div class="cat-col -promo">
+          <span class="cp-tag">Free delivery</span>
+          <h3>Orders over UGX 200,000</h3>
+          <p>Pay on delivery, 7-day returns and fresh deals landing every single day.</p>
+          <a class="cp-btn" href="#/r/top">Shop the deals</a>
+          <img class="cp-img" src="img/promo-box.svg" alt="Free delivery on orders over 200,000 UGX">
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main page" id="homePage">
+    <section class="hero">
+      <div class="crs-view hero-view">
+        <div class="hero-track" id="heroTrack">
+          <a class="hero-slide" href="#/r/top"><img src="img/hero-1.svg" alt="Black Friday 2026"></a>
+          <a class="hero-slide" href="#/r/flash"><img src="img/hero-2.svg" alt="Flash Sales"></a>
+          <a class="hero-slide" href="#/r/tv"><img src="img/hero-3.svg" alt="Electronics Week"></a>
+          <a class="hero-slide" href="#/r/fashion"><img src="img/hero-4.svg" alt="Fashion Week"></a>
+          <a class="hero-slide" href="#/r/super"><img src="img/hero-5.svg" alt="Supermarket Deals"></a>
+        </div>
+        <button class="c-btn _prev" id="heroPrev" aria-label="Previous">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <button class="c-btn _next" id="heroNext" aria-label="Next">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m9 5 7 7-7 7"/></svg>
+        </button>
+        <div class="crs-ind" id="heroInd"></div>
+      </div>
+      <aside class="hero-side">
+        <a href="#/info/ShopOnlineUg%20Prime"><img src="img/promo-prime.svg" alt="ShopOnlineUg Prime"></a>
+        <a href="#/r/top"><img src="img/promo-payday.svg" alt="Payday Deals"></a>
+        <a href="#/info/Returning%20an%20item"><img src="img/promo-returns.svg" alt="Free Returning"></a>
+      </aside>
+    </section>
+
+    <section class="cat-strip sec">
+      <div class="sec-hdr _soft">
+        <h2 class="ttl">Popular Categories</h2>
+        <a class="auz" href="#/cats">Explore Popular Categories <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg></a>
+      </div>
+      <div class="cat-slider" id="catSlider">
+        <div class="cat-tiles" id="catTiles"></div>
+        <button class="c-btn _prev" id="catPrev" aria-label="Previous categories">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <button class="c-btn _next" id="catNext" aria-label="Next categories">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m9 5 7 7-7 7"/></svg>
+        </button>
+        <div class="crs-ind" id="catInd" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <section class="sec flash" id="flashSec" data-key="flash">
+      <div class="sec-hdr _flash">
+        <h2 class="ttl">
+          Flash Sales
+          <span class="fl-cd">
+            <span class="cd"><b id="cdD">02</b>d</span>
+            <span class="cd"><b id="cdH">10</b>h</span>
+            <span class="cd"><b id="cdM">45</b>m</span>
+            <span class="cd"><b id="cdS">09</b>s</span>
+          </span>
+        </h2>
+        <a class="auz" href="#/r/flash">See All <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg></a>
+      </div>
+      <div class="prd-row grid6" id="gridFlash"></div>
+    </section>
+
+    <div class="cta-strip">
+      <a href="#/r/top"><img src="img/cta-1.svg" alt="Unlock Big Savings"></a>
+      <a href="#/r/home"><img src="img/cta-2.svg" alt="Office Week"></a>
+      <a href="#/r/super"><img src="img/cta-3.svg" alt="Fresh Groceries"></a>
+      <a href="#/r/beauty"><img src="img/cta-4.svg" alt="Beauty Haul"></a>
+    </div>
+
+    <a class="band" href="#/r/top">
+      <img src="img/band-gift.svg" alt="Super Weekend Sale - up to 70% off">
+    </a>
+
+    <section class="sec topling" id="topSec" data-key="top">
+      <div class="sec-hdr _dark">
+        <h2 class="ttl">Top Selling Items</h2>
+        <a class="auz" href="#/r/top">See All <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg></a>
+      </div>
+      <div class="prd-row grid6" id="gridTop"></div>
+    </section>
+
+    <section class="sec" id="superSec" data-key="super">
+      <div class="sec-hdr _brand">
+        <h2 class="ttl">Supermarket</h2>
+        <a class="auz" href="#/r/super">See All <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg></a>
+      </div>
+      <div class="prd-row grid6" id="gridSuper"></div>
+    </section>
+
+    <section class="sec" id="phoneSec" data-key="phones">
+      <div class="sec-hdr _soft">
+        <h2 class="ttl">Best Selling Smartphones</h2>
+        <a class="auz" href="#/r/phones">See All <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg></a>
+      </div>
+      <div class="prd-row grid6" id="gridPhone"></div>
+    </section>
+
+    <section class="sec" id="tvSec" data-key="tv">
+      <div class="sec-hdr _soft">
+        <h2 class="ttl">TV &amp; Electronics</h2>
+        <a class="auz" href="#/r/tv">See All <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg></a>
+      </div>
+      <div class="prd-row grid6" id="gridTv"></div>
+    </section>
+
+    <section class="sec" id="fashionSec" data-key="fashion">
+      <div class="sec-hdr _soft">
+        <h2 class="ttl">Fashion &amp; Shoes</h2>
+        <a class="auz" href="#/r/fashion">See All <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg></a>
+      </div>
+      <div class="prd-row grid6" id="gridFashion"></div>
+    </section>
+
+    <section class="sec" id="beautySec" data-key="beauty">
+      <div class="sec-hdr _soft">
+        <h2 class="ttl">Health &amp; Beauty</h2>
+        <a class="auz" href="#/r/beauty">See All <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg></a>
+      </div>
+      <div class="prd-row grid6" id="gridBeauty"></div>
+    </section>
+
+    <section class="sec" id="toySec" data-key="toys">
+      <div class="sec-hdr _soft">
+        <h2 class="ttl">Toys &amp; Kids</h2>
+        <a class="auz" href="#/r/toys">See All <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg></a>
+      </div>
+      <div class="prd-row grid6" id="gridToy"></div>
+    </section>
+
+    <section class="sec brand-sec" id="brandSec">
+      <div class="sec-hdr _plain">
+        <h2 class="ttl">Offical Stores</h2>
+        <a class="auz" href="#/cats">See All <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg></a>
+      </div>
+      <div class="crs-view brand-view">
+        <div class="brand-track" id="brandTrack"></div>
+        <button class="c-btn _prev" id="brandPrev" aria-label="Previous">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M15 5 8 12l7 7"/></svg>
+        </button>
+        <button class="c-btn _next" id="brandNext" aria-label="Next">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m9 5 7 7-7 7"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <section class="sec" id="vendorSec" hidden>
+      <div class="sec-hdr _plain">
+        <h2 class="ttl">Top picks from our vendors</h2>
+        <a class="auz" href="#/r/vendor">See All <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg></a>
+      </div>
+      <div class="prd-row grid6" id="gridVendor"></div>
+    </section>
+
+    <section class="sec" id="recentSec" hidden>
+      <div class="sec-hdr _plain">
+        <h2 class="ttl">Recently Viewed</h2>
+        <a class="auz" href="#/account" data-route="/account">View all</a>
+      </div>
+      <div class="prd-row grid6" id="gridRecent"></div>
+    </section>
+  </main>
+
+  <section class="page container" id="catsPage" hidden>
+    <div class="crumb"><a href="#/">Home</a><span>&#8250;</span><b>All Categories</b></div>
+    <div class="cats-hero">
+      <div class="cats-hero-txt">
+        <h2>Browse by <em>Category</em></h2>
+        <p id="catsStat">Twelve departments packed with thousands of deals, all in one store.</p>
+      </div>
+      <div class="cats-hero-img" aria-hidden="true">&#128230;</div>
+    </div>
+    <div class="cats-grid" id="catsGrid"></div>
+    <div class="cats-note">
+      <span aria-hidden="true">&#128274;</span>
+      <div><b>Can't find what you need?</b> Use the search bar above, or visit our <a href="#/sell">vendor marketplace</a> for even more products.</div>
+    </div>
+  </section>
+
+  <section class="page container" id="searchPage" hidden>
+    <div class="crumb"><a href="#/">Home</a><span>&#8250;</span>Search: <b id="searchTerm"></b></div>
+    <div class="pg-hdr">
+      <h2 id="searchH">Search results</h2>
+      <span class="pg-count" id="searchCount"></span>
+    </div>
+    <div class="prd-row grid6" id="searchGrid"></div>
+    <div class="empty" id="searchEmpty" hidden>
+      <div class="empty-ic">&#128269;</div>
+      <h3>No products found</h3>
+      <p>Try different keywords or browse our categories instead.</p>
+      <a class="btn _prim" href="#/">Back to home</a>
+    </div>
+  </section>
+
+  <section class="page container" id="browsePage" hidden>
+    <div class="crumb"><a href="#/">Home</a><span>&#8250;</span><b id="browseName"></b></div>
+    <div class="pg-hdr">
+      <h2 id="browseH"></h2>
+      <span class="pg-count" id="browseCount"></span>
+    </div>
+    <div class="prd-row grid6" id="browseGrid"></div>
+    <div class="empty" id="browseEmpty" hidden>
+      <div class="empty-ic">&#128722;</div>
+      <h3 id="browseEmptyH">Nothing here yet</h3>
+      <p>We are still stocking this category. Check back soon.</p>
+      <a class="btn _prim" href="#/">Back to home</a>
+    </div>
+  </section>
+
+  <section class="page container pdp-page" id="pdpPage" hidden>
+    <div class="crumb" id="pdpCrumb"></div>
+    <div class="pdp-grid">
+      <div class="pdp-gallery">
+        <div class="pdp-main"><img id="pdpMainImg" src="" alt=""></div>
+        <div class="pdp-thumbs" id="pdpThumbs"></div>
+      </div>
+      <div class="pdp-info">
+        <div class="pdp-brand" id="pdpBrand"></div>
+        <h1 class="pdp-name" id="pdpName"></h1>
+        <div class="pdp-meta">
+          <span class="stars">&#9733;</span><b id="pdpRate"></b>
+          <span id="pdpSold"></span>
+          <span class="pill-stock" id="pdpStock"></span>
+        </div>
+        <div class="pdp-price-box">
+          <div class="pdp-price" id="pdpPrice"></div>
+          <div class="pdp-prc-side">
+            <span class="pdp-old" id="pdpOld"></span>
+            <span class="pdp-off" id="pdpOff"></span>
+          </div>
+        </div>
+        <div class="pdp-pay">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+          Pay on Delivery available
+        </div>
+        <div class="pdp-stripe">
+          <div><span class="k">Delivery</span><b id="pdpDelivery"></b></div>
+          <div><span class="k">Returns</span><b>Free 7-day returns</b></div>
+          <div><span class="k">Warranty</span><b id="pdpWarranty"></b></div>
+        </div>
+        <div class="pdp-opt">
+          <h3>Colour / Variant</h3>
+          <div class="pdp-colors" id="pdpColors"></div>
+        </div>
+        <div class="pdp-opt">
+          <h3>Quantity</h3>
+          <div class="pdp-qty">
+            <button type="button" id="qtyMinus" aria-label="Decrease">&minus;</button>
+            <span id="qtyVal">1</span>
+            <button type="button" id="qtyPlus" aria-label="Increase">+</button>
+            <span class="pdp-sub" id="pdpSub"></span>
+          </div>
+        </div>
+        <div class="pdp-cta">
+          <button type="button" class="pdp-buy" id="pdpBuy">BUY NOW</button>
+          <button type="button" class="pdp-add" id="pdpAdd">ADD TO CART</button>
+          <button type="button" class="pdp-wish" id="pdpWish" aria-label="Add to wishlist">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21.2l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+          </button>
+          <button type="button" class="pdp-share" id="pdpShare" aria-label="Share this product">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+          </button>
+        </div>
+        <div class="pdp-seller">Sold and delivered by <b id="pdpSeller"></b></div>
+      </div>
+    </div>
+    <div class="pdp-tabs">
+      <button class="tab on" data-tab="desc">Description</button>
+      <button class="tab" data-tab="specs">Specifications</button>
+      <button class="tab" data-tab="del">Delivery &amp; Returns</button>
+      <button class="tab" data-tab="rev">Reviews</button>
+    </div>
+    <div class="pdp-tab-body" id="tabDesc"></div>
+    <div class="pdp-tab-body" id="tabSpecs" hidden></div>
+    <div class="pdp-tab-body" id="tabDel" hidden></div>
+    <div class="pdp-tab-body" id="tabRev" hidden></div>
+    <div class="rel-sec">
+      <div class="sec-hdr _soft"><h2 class="ttl">Related products</h2></div>
+      <div class="prd-row grid6" id="pdpRelated"></div>
+    </div>
+  </section>
+
+  <section class="page container" id="checkoutPage" hidden>
+    <div class="crumb"><a href="#/">Home</a><span>&#8250;</span><a href="#" id="coBackCart">Cart</a><span>&#8250;</span>Checkout</div>
+    <div class="co-grid">
+      <div class="co-main">
+        <h2>Delivery details</h2>
+        <form id="coForm" class="co-form">
+          <div class="co-f"><label>Full name</label><input required id="coName" type="text" placeholder="e.g. Amina Nakato"></div>
+          <div class="co-f"><label>Phone number</label><input required id="coPhone" type="tel" placeholder="+256 7XX XXX XXX"></div>
+          <div class="co-f"><label>Email</label><input id="coEmail" type="email" placeholder="you@email.com"></div>
+          <div class="co-f"><label>Region</label>
+            <select id="coRegion"></select>
+          </div>
+          <div class="co-f"><label>Town / City</label><input required id="coTown" type="text" placeholder="e.g. Kampala"></div>
+          <div class="co-f"><label>Address</label><input required id="coAddr" type="text" placeholder="Street, building, landmark"></div>
+        </form>
+        <h2>Payment method</h2>
+        <div class="pay-rows" id="coPay">
+          <label class="pay-row on" data-pay="pod"><input type="radio" name="pay" checked><span><b>Pay on Delivery</b><i>Pay with cash or mobile money when your order arrives</i></span></label>
+          <label class="pay-row" data-pay="mtn"><input type="radio" name="pay"><span><b>MTN Mobile Money</b><i>Approve the payment prompt on your phone</i></span></label>
+          <label class="pay-row" data-pay="airtel"><input type="radio" name="pay"><span><b>Airtel Money</b><i>Approve the payment prompt on your phone</i></span></label>
+          <label class="pay-row" data-pay="card"><input type="radio" name="pay"><span><b>Card (Visa / Mastercard)</b><i>Secure payment via our gateway</i></span></label>
+        </div>
+      </div>
+      <aside class="co-side">
+        <h2>Order summary</h2>
+        <div class="co-items" id="coItems"></div>
+        <div class="co-total"><span>Subtotal</span><b id="coSubtotal"></b></div>
+        <div class="co-total"><span>Delivery</span><b id="coDelivery"></b></div>
+        <div class="co-total _grand"><span>Total</span><b id="coGrand"></b></div>
+        <button type="button" class="pdp-buy" id="coPlace">PLACE ORDER</button>
+      </aside>
+    </div>
+  </section>
+
+  <section class="page container" id="successPage" hidden>
+    <div class="success">
+      <div class="success-ic">
+        <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      </div>
+      <h2>Order placed successfully</h2>
+      <p>Thank you! Your order <b id="orderNo"></b> has been received. We will call you shortly to confirm delivery.</p>
+      <p class="success-pay" id="successPay" hidden></p>
+      <a class="btn _prim" href="#/">Continue shopping</a>
+    </div>
+  </section>
+
+  <div class="modal-ov" id="payModalOv" hidden></div>
+  <div class="modal" id="payModal" hidden role="dialog" aria-label="Payment">
+    <button class="modal-x" id="payModalClose" aria-label="Close">&times;</button>
+    <div id="payModalBody"></div>
+  </div>
+
+  <section class="page container" id="infoPage" hidden>
+    <div class="crumb"><a href="#/">Home</a><span>&#8250;</span><b id="infoCrumb"></b></div>
+    <div class="info-card">
+      <h2 id="infoH"></h2>
+      <div id="infoBody"></div>
+    </div>
+  </section>
+
+  <section class="page container" id="wishPage" hidden>
+    <div class="crumb"><a href="#/">Home</a><span>&#8250;</span><b>Wishlist</b></div>
+    <div class="pg-hdr">
+      <h2>My Wishlist</h2>
+      <span class="pg-count" id="wishN"></span>
+    </div>
+    <div class="prd-row grid6" id="wishGrid"></div>
+    <div class="empty" id="wishEmpty" hidden>
+      <div class="empty-ic">&#10084;&#65039;</div>
+      <h3>Your wishlist is empty</h3>
+      <p>Tap the heart on any product to save it here for later.</p>
+      <a class="btn _prim" href="#/">Start shopping</a>
+    </div>
+  </section>
+
+  <section class="page container" id="storePage" hidden>
+    <div class="crumb"><a href="#/">Home</a><span>&#8250;</span><b id="storeCrumb"></b></div>
+    <div class="store-head">
+      <div class="store-logo" id="storeLogo"></div>
+      <div class="store-meta">
+        <h1 id="storeName"></h1>
+        <div class="store-badges">
+          <span class="s-badge">Official Store</span>
+          <span class="s-badge _green">98% positive ratings</span>
+          <span class="s-badge _gray" id="storeCount"></span>
+        </div>
+        <p id="storeAbout"></p>
+      </div>
+      <button type="button" class="pdp-add" id="storeFollow">FOLLOW</button>
+    </div>
+    <div class="pg-hdr">
+      <h2>Products from this store</h2>
+      <span class="pg-count" id="storeProductCount"></span>
+    </div>
+    <div class="prd-row grid6" id="storeGrid"></div>
+  </section>
+
+  <section class="page container" id="ordersPage" hidden>
+    <div class="crumb"><a href="#/">Home</a><span>&#8250;</span><b>My Orders</b></div>
+    <div class="pg-hdr">
+      <h2>My Orders</h2>
+      <span class="pg-count" id="ordersN"></span>
+    </div>
+    <div class="orders-list" id="ordersList"></div>
+    <div class="empty" id="ordersEmpty" hidden>
+      <div class="empty-ic">&#128230;</div>
+      <h3>No orders yet</h3>
+      <p>When you place an order it will appear here so you can track it.</p>
+      <a class="btn _prim" href="#/">Start shopping</a>
+    </div>
+  </section>
+
+  <section class="page container" id="accountPage" hidden>
+    <div class="crumb"><a href="#/">Home</a><span>&#8250;</span><b>Account</b></div>
+    <div class="acct-grid">
+      <aside class="acct-side" id="acctSide"></aside>
+      <div class="acct-body" id="acctBody"></div>
+    </div>
+  </section>
+
+  <section class="page container" id="sellPage" hidden>
+    <div class="crumb"><a href="#/">Home</a><span>&#8250;</span><b>Sell on ShopOnlineUg</b></div>
+    <div id="sellBody"></div>
+  </section>
+
+  <section class="page container" id="vendorPage" hidden>
+    <div class="crumb"><a href="#/">Home</a><span>&#8250;</span><b>Vendor portal</b></div>
+    <div id="vendorBody"></div>
+  </section>
+
+  <section class="page container" id="adminPage" hidden>
+    <div class="crumb"><a href="#/">Home</a><span>&#8250;</span><b>Admin portal</b></div>
+    <div id="adminBody"></div>
+  </section>
+
+  <section class="page container" id="driverPage" hidden>
+    <div class="crumb"><a href="#/">Home</a><span>&#8250;</span><b>Rider portal</b></div>
+    <div id="driverBody"></div>
+  </section>
+
+  <nav class="tabbar" id="tabBar" aria-label="Primary">
+    <button type="button" class="tb" data-tab="home">
+      <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10.6 9-7.6 9 7.6"/><path d="M5.5 9.6V21h13V9.6"/></svg>
+      <span>Home</span>
+    </button>
+    <button type="button" class="tb" data-tab="cat">
+      <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"/></svg>
+      <span>Categories</span>
+    </button>
+    <button type="button" class="tb" data-tab="wish">
+      <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21.2l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      <span>Wishlist</span>
+      <b class="tb-badge _wish" id="tbWish">0</b>
+    </button>
+    <button type="button" class="tb" data-tab="cart">
+      <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.6"/><circle cx="17" cy="20" r="1.6"/><path d="M3 4h2l2.4 11.2a1.5 1.5 0 0 0 1.5 1.2h7.9a1.5 1.5 0 0 0 1.5-1.2L20 8H6"/></svg>
+      <span>Cart</span>
+      <b class="tb-badge" id="tbCart">0</b>
+    </button>
+    <button type="button" class="tb" data-tab="account">
+      <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.3 3.6-6.8 8-6.8s8 2.5 8 6.8"/></svg>
+      <span>Account</span>
+    </button>
+  </nav>
+
+  <div class="drawer-ov" id="drawerOv" hidden></div>
+  <aside class="drawer" id="cartDrawer" hidden aria-label="Shopping cart">
+    <div class="sheet-handle"></div>
+    <div class="drawer-h">
+      <h3>Your Cart <span id="drawerCount"></span></h3>
+      <button type="button" id="drawerClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="drawer-items" id="drawerItems"></div>
+    <div class="drawer-empty" id="drawerEmpty">
+      <div class="empty-ic">&#128722;</div>
+      <h3>Your cart is empty</h3>
+      <p>Add items to get started.</p>
+      <a class="btn _prim" href="#/">Start shopping</a>
+    </div>
+    <div class="drawer-f">
+      <div class="drawer-total"><span>Subtotal</span><b id="drawerSub">UGX 0</b></div>
+      <button type="button" class="pdp-buy" id="drawerCheckout">PROCEED TO CHECKOUT</button>
+    </div>
+  </aside>
+
+  <div class="modal-ov" id="modalOv" hidden></div>
+  <div class="modal" id="acctModal" hidden role="dialog" aria-label="Account">
+    <button class="modal-x" id="modalClose" aria-label="Close">&times;</button>
+    <div class="acct-tabs">
+      <button class="on" data-at="login">Sign In</button>
+      <button data-at="reg">Register</button>
+    </div>
+    <div class="acct-msg" id="acctMsg" hidden></div>
+    <form class="acct-form" id="loginForm" data-panel="login">
+      <label>Email</label><input type="email" id="loginEmail" placeholder="you@email.com" autocomplete="email" required>
+      <label>Password</label><input type="password" id="loginPass" placeholder="Password" autocomplete="current-password" required>
+      <button class="btn _prim acct-submit" type="submit">SIGN IN</button>
+      <div class="acct-or"><span>or</span></div>
+      <button type="button" class="social-btn _g" id="googleBtn">
+        <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.6 30.2 0 24 0 14.6 0 6.4 5.4 2.6 13.2l7.8 6c1.9-5.6 7.1-9.7 13.6-9.7z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.4 5.7c4.3-4 6.8-9.9 6.8-17.4z"/><path fill="#FBBC05" d="M10.4 28.8c-.5-1.4-.8-2.9-.8-4.8s.3-3.4.8-4.8l-7.8-6C.9 16.5 0 20.1 0 24s.9 7.5 2.6 10.8l7.8-6z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.6l-7.4-5.7c-2 1.4-4.7 2.3-7.8 2.3-6.5 0-11.7-4.1-13.6-9.7l-7.8 6C6.4 42.6 14.6 48 24 48z"/></svg>
+        Continue with Google
+      </button>
+      <button type="button" class="social-btn" id="fbBtn">Continue with Facebook</button>
+      <p class="acct-foot">Want to sell? <a href="#/sell" id="sellLink">Apply as a vendor</a></p>
+    </form>
+    <form class="acct-form" id="regForm" data-panel="reg" hidden>
+      <label>Full name</label><input type="text" id="regName" placeholder="e.g. Amina Nakato" autocomplete="name" required>
+      <label>Email</label><input type="email" id="regEmail" placeholder="you@email.com" autocomplete="email" required>
+      <label>Phone number</label><input type="tel" id="regPhone" placeholder="+256 7XX XXX XXX" autocomplete="tel" required>
+      <label>Password</label><input type="password" id="regPass" placeholder="Create a password (min 6 characters)" autocomplete="new-password" required>
+      <button class="btn _prim acct-submit" type="submit">CREATE ACCOUNT</button>
+      <p class="acct-foot">We will email you a 6-digit confirmation code that expires in 10 minutes.</p>
+    </form>
+    <form class="acct-form" id="verifyForm" data-panel="verify" hidden>
+      <h3 class="acct-h">Confirm your email</h3>
+      <p class="acct-p" id="verifyText">Enter the 6-digit confirmation code we sent to your email. It expires in 10 minutes.</p>
+      <label>Confirmation code</label>
+      <input type="text" id="verifyCode" class="acct-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000" required>
+      <button class="btn _prim acct-submit" type="submit">CONFIRM EMAIL</button>
+      <div class="acct-links">
+        <button type="button" class="linkish" id="resendCode">Resend code</button>
+        <button type="button" class="linkish" id="openMail">Open mailbox</button>
+        <button type="button" class="linkish" id="verifyBack">Back</button>
+      </div>
+    </form>
+    <div class="acct-form" id="googlePanel" data-panel="google" hidden>
+      <h3 class="acct-h">Choose an account</h3>
+      <p class="acct-p">to continue to ShopOnlineUg</p>
+      <div class="g-list" id="gList"></div>
+      <label>Use another account</label>
+      <input type="email" id="gOther" placeholder="you@gmail.com">
+      <button type="button" class="btn _prim acct-submit" id="gOtherBtn">CONTINUE</button>
+      <div class="acct-links"><button type="button" class="linkish" id="googleBack">Back</button></div>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="mailOv" hidden></div>
+  <div class="modal _wide" id="mailModal" hidden role="dialog" aria-label="Mailbox">
+    <button class="modal-x" id="mailClose" aria-label="Close">&times;</button>
+    <div class="mail-h">
+      <div><h3>Mailbox</h3><p class="mail-sub">Local preview of every email the platform sends (codes, links, approvals).</p></div>
+      <button type="button" class="linkish" id="mailClear">Clear</button>
+    </div>
+    <div class="mail-list" id="mailBody"></div>
+  </div>
+
+  <div class="modal-ov" id="shareOv" hidden></div>
+  <div class="modal share-modal" id="shareModal" hidden role="dialog" aria-label="Share this product">
+    <button class="modal-x" id="shareClose" aria-label="Close">&times;</button>
+    <div class="share-head">
+      <img id="shareImg" src="" alt="">
+      <div>
+        <h3 id="shareTitle">Share this product</h3>
+        <p class="share-sub" id="shareSub">Send it to a friend or copy the link.</p>
+      </div>
+    </div>
+    <div class="share-url" id="shareUrl"></div>
+    <div class="share-grid" id="shareGrid">
+      <button type="button" class="share-opt" data-svc="copy" id="shareCopyBtn">
+        <span class="share-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </span><b id="shareCopyLabel">Copy link</b>
+      </button>
+      <a class="share-opt" id="shareWa" href="#" target="_blank" rel="noopener">
+        <span class="share-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.7 15L2 22l5.2-1.3A10 10 0 1 0 12 2zm5.5 14.1c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5-4.5-.2-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.5s.8 1.9.9 2c.1.1.1.3 0 .5l-.4.5c-.1.2-.3.3-.5.5s-.4.4-.2.7c.2.3.9 1.4 1.9 2.3 1.3 1.1 2.3 1.5 2.6 1.6.3.2.5.1.7-.1l1-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.6.4.1.1.1.7-.1 1.4z"/></svg>
+        </span><b>WhatsApp</b>
+      </a>
+      <a class="share-opt" id="shareFb" href="#" target="_blank" rel="noopener">
+        <span class="share-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M13.5 21v-7h2.5l.5-3h-3V9.2c0-.9.3-1.4 1.5-1.4H16V5.2c-.3 0-1.2-.2-2.2-.2-2.3 0-3.8 1.4-3.8 4V11H7.5v3H10v7h3.5z"/></svg>
+        </span><b>Facebook</b>
+      </a>
+      <a class="share-opt" id="shareX" href="#" target="_blank" rel="noopener">
+        <span class="share-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M17.6 3H20l-5.6 6.4L20.8 21h-5.1l-4-5.2L7 21H4.4l6-6.8L3.8 3H9l3.6 4.7L17.6 3zm-.9 16h1.3L8 4.4H6.6L16.7 19z"/></svg>
+        </span><b>X (Twitter)</b>
+      </a>
+      <a class="share-opt" id="shareMail" href="#">
+        <span class="share-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
+        </span><b>Email</b>
+      </a>
+      <button type="button" class="share-opt" data-svc="native" id="shareNativeBtn" hidden>
+        <span class="share-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+        </span><b>Share&hellip;</b>
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-ov" id="avMsgOv" hidden></div>
+  <div class="modal" id="avMsgModal" hidden role="dialog" aria-label="Message vendor">
+    <button class="modal-x" id="avMsgClose" aria-label="Close">&times;</button>
+    <div class="mail-h">
+      <div><h3>Message vendor</h3><p class="mail-sub" id="avMsgTo">Send a note from the admin portal.</p></div>
+    </div>
+    <div class="msg-form">
+      <label for="avMsgSubject">Subject</label>
+      <input class="field" id="avMsgSubject" type="text" maxlength="140" value="Message from the ShopOnlineUg team">
+      <label for="avMsgBody">Message</label>
+      <textarea class="field" id="avMsgBody" rows="6" maxlength="2000" placeholder="Write your message to this vendor..."></textarea>
+      <p class="msg-err" id="avMsgErr" hidden></p>
+      <div class="msg-actions">
+        <button type="button" class="btn _ghost" id="avMsgCancel">Cancel</button>
+        <button type="button" class="btn _prim" id="avMsgSend">Send message</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="dpop-ov" id="dealPopOv" hidden></div>
+  <div class="dpop" id="dealPop" hidden>
+    <button type="button" class="dpop-x" id="dealPopX" aria-label="Close offer popup">&#10005;</button>
+    <a href="#/r/top" id="dealPopLink"><img src="img/deal-popup.svg" alt="Deal of the day - Daily Mega Sale"></a>
+  </div>
+
+  <footer class="ftr">
+    <div class="container">
+      <div class="ftr-top">
+        <div class="ft-cell">
+          <h4 class="ft-title">Need Help?</h4>
+          <div class="ft-help">
+            <a href="#/info/Help%20Centre" class="help-box">
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a1.5 1.5 0 0 1-1.6 1.5 20 20 0 0 1-8.8-3.2 19.7 19.7 0 0 1-6.1-6.1A20 20 0 0 1 2.3 3.6 1.5 1.5 0 0 1 3.8 2h3a1.5 1.5 0 0 1 1.5 1.3c.1.8.3 1.6.6 2.4a1.5 1.5 0 0 1-.3 1.6l-1.3 1.2a16 16 0 0 0 6.1 6.1l1.5-1.4a1.5 1.5 0 0 1 1.6-.3c.8.3 1.6.5 2.4.6a1.5 1.5 0 0 1 1.3 1.5z"/></svg>
+              <span><b>Call Centre</b><i>+256-700-579-597</i></span>
+            </a>
+            <a href="#/info/Help%20Centre" class="help-box">
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9.5a3 3 0 1 1 4.6 2.6c-.8.5-1.1 1-1.1 1.9"/><circle cx="12" cy="17.5" r=".4"/></svg>
+              <span><b>Help Center</b><i>help.shoponline.ug</i></span>
+            </a>
+          </div>
+        </div>
+        <div class="ft-cell">
+          <h4 class="ft-title">Convenient &amp; Secure</h4>
+          <div class="pay-chips">
+            <span>VISA</span><span>Mastercard</span><span>MTN MoMo</span><span>Airtel Money</span><span>Paypal</span><span>Cash on Delivery</span>
+          </div>
+        </div>
+        <div class="ft-cell">
+          <h4 class="ft-title">Download the ShopOnlineUg App</h4>
+          <div class="ft-app">
+            <div class="qr"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3z"/></svg></div>
+            <div class="store-btns">
+              <a href="#/info/Get%20the%20app" class="store-btn">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17 9l-8-7a2 2 0 0 1 2.5-2.6L17 5.4l5.6 4.4-5.6 2.4V9z"/><path d="M22.6 9.8l-3.1 1.3L9 4.6V3.5l1.5-1.2L22.6 9.8zM17 9l-14 3.1a2 2 0 0 0 .3 4L17 9 3 13zM15.6 6.2l4.6 2.3a1 1 0 0 1 0 1.9L15.6 12V6.2zM11 4.8l4.2 2.4L11 9.7V4.8zM3 17.5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2V22H3v-4.5z"/></svg>
+                <span><i>Download on the</i><b>App Store</b></span>
+              </a>
+              <a href="#/info/Get%20the%20app" class="store-btn">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M3.6 2.3c-.3.3-.5.8-.5 1.5v16.4c0 .7.2 1.2.5 1.5l.1.1L13.7 12l-10-9.7h-.1zM15.9 9L5 2.3l10.3 6.2L15.9 9z"/><path d="M20.5 10.2L15.9 9l-10.3 6.2 13.3 5.6c.7-.1 1.3-.7 1.6-1.4.2-.5.2-1 .1-1.6zM19 15.2a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/></svg>
+                <span><i>Get it on</i><b>Google Play</b></span>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="ft-cell">
+          <h4 class="ft-title">Join Us On</h4>
+          <div class="social">
+            <a href="https://www.facebook.com" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M13.5 21v-7h2.5l.5-3h-3V9.2c0-.9.3-1.4 1.5-1.4H16V5.2c-.3 0-1.2-.2-2.2-.2-2.3 0-3.8 1.4-3.8 4V11H7.5v3H10v7h3.5z"/></svg></a>
+            <a href="https://x.com" target="_blank" rel="noopener" aria-label="Twitter"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M17.6 3H20l-5.6 6.4L20.8 21h-5.1l-4-5.2L7 21H4.4l6-6.8L3.8 3H9l3.6 4.7L17.6 3zm-.9 16h1.3L8 4.4H6.6L16.7 19z"/></svg></a>
+            <a href="https://www.instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 7.5A4.5 4.5 0 1 0 16.5 12 4.5 4.5 0 0 0 12 7.5zm0 7A2.5 2.5 0 1 1 14.5 12 2.5 2.5 0 0 1 12 14.5zM17.8 4.8A2 2 0 1 0 19.8 6.8a2 2 0 0 0-2-2zM20 10.2c0-.6 0-.9-.1-1.3a4.6 4.6 0 0 0-1-2.8A4.6 4.6 0 0 0 16 5.1c-.4-.1-.7-.1-1.3-.1H9.3c-.6 0-.9 0-1.3.1a4.6 4.6 0 0 0-2.8 1A4.6 4.6 0 0 0 4.1 8.9c-.1.4-.1.7-.1 1.3v5.6c0 .6 0 .9.1 1.3a4.6 4.6 0 0 0 1 2.8 4.6 4.6 0 0 0 2.8 1c.4.1.7.1 1.3.1h5.6c.6 0 .9 0 1.3-.1a4.6 4.6 0 0 0 2.8-1 4.6 4.6 0 0 0 1-2.8c.1-.4.1-.7.1-1.3V10.2zM21.8 16a6.4 6.4 0 0 1-1.7 4 6.4 6.4 0 0 1-4 1.7c-.4.1-1.1.1-1.8.1H9.7c-.7 0-1.4 0-1.8-.1a6.4 6.4 0 0 1-4-1.7 6.4 6.4 0 0 1-1.7-4C2.1 15.6 2.1 14.9 2.1 14.2 2.1 13.5 2.1 12.8 2.1 12 2.1 11.2 2.1 10.5 2.1 9.8c0-.7 0-1.4.1-1.8a6.4 6.4 0 0 1 1.7-4 6.4 6.4 0 0 1 4-1.7c.4-.1 1.1-.1 1.8-.1h4.6c.7 0 1.4 0 1.8.1a6.4 6.4 0 0 1 4 1.7 6.4 6.4 0 0 1 1.7 4c.1.4.1 1.1.1 1.8v4.6c0 .7 0 1.4-.1 1.8z"/></svg></a>
+            <a href="https://www.youtube.com" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M21.6 7.2a2.6 2.6 0 0 0-1.8-1.9C18.2 5 12 5 12 5s-6.2 0-7.8.3A2.6 2.6 0 0 0 2.4 7.2 27 27 0 0 0 2 12a27 27 0 0 0 .4 4.8 2.6 2.6 0 0 0 1.8 1.9c1.6.3 7.8.3 7.8.3s6.2 0 7.8-.3a2.6 2.6 0 0 0 1.8-1.9A27 27 0 0 0 22 12a27 27 0 0 0-.4-4.8zM10 15V9l5.2 3z"/></svg></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="ft-cols">
+        <div class="ft-col">
+          <h4>LET US HELP YOU</h4>
+          <a href="#/account">Account</a><a href="#/info/How%20to%20shop%20on%20ShopOnlineUg">How to shop on ShopOnlineUg</a>
+          <a href="#/orders">Track your order</a><a href="#/info/Returns%20%26%20Cancellations">Returns &amp; Cancellations</a>
+          <a href="#/info/Delivery%20information">Delivery information</a><a href="#/info/Help%20Centre">Help Center</a>
+        </div>
+        <div class="ft-col">
+          <h4>ABOUT SHOPONLINEUG</h4>
+          <a href="#/info/About%20ShopOnlineUg">About us</a><a href="#/info/ShopOnlineUg%20careers">ShopOnlineUg careers</a>
+          <a href="#/info/ShopOnlineUg%20Express">ShopOnlineUg Express</a><a href="#/info/Terms%20and%20conditions">Terms and conditions</a>
+          <a href="#/info/Privacy%20notice">Privacy notice</a><a href="#/info/ShopOnlineUg%20Prime">ShopOnlineUg Prime</a>
+        </div>
+        <div class="ft-col">
+          <h4>MAKE MONEY WITH US</h4>
+          <a href="#/sell">Sell on ShopOnlineUg</a><a href="#/vendor">Vendor hub</a>
+          <a href="#/info/Become%20a%20sales%20consultant">Become a sales consultant</a><a href="#/info/Become%20a%20logistics%20service%20partner">Become a logistics service partner</a>
+          <a href="#/driver">Rider portal - deliver with us</a>
+          <a href="#/info/ShopOnlineUg%20Affiliate%20Program">ShopOnlineUg Affiliate Program</a>
+        </div>
+        <div class="ft-col">
+          <h4>SHOPONLINEUG INTERNATIONAL</h4>
+          <a href="#/info/ShopOnlineUg%20Nigeria">ShopOnlineUg Nigeria</a><a href="#/info/ShopOnlineUg%20Kenya">ShopOnlineUg Kenya</a>
+          <a href="#/info/ShopOnlineUg%20Cote%20d%27Ivoire">ShopOnlineUg C&ocirc;te d&apos;Ivoire</a><a href="#/info/ShopOnlineUg%20Morocco">ShopOnlineUg Morocco</a>
+          <a href="#/info/ShopOnlineUg%20Egypt">ShopOnlineUg Egypt</a><a href="#/info/ShopOnlineUg%20Ghana">ShopOnlineUg Ghana</a>
+        </div>
+        <div class="ft-col">
+          <h4>PAYMENT METHODS</h4>
+          <a href="#/info/Mobile%20Money">Mobile Money</a><a href="#/info/Pay%20on%20Delivery">Pay on Delivery</a>
+          <a href="#/info/Visa%20-%20Mastercard">Visa / Mastercard</a><a href="#/info/PayPal">PayPal</a>
+          <a href="#/info/Bank%20Transfer">Bank Transfer</a>
+        </div>
+      </div>
+
+      <div class="ft-cat">
+        <h4>POPULAR CATEGORIES</h4>
+        <div class="ft-cat-links">
+          <a href="#/r/phones">Smartphones</a><a href="#/r/phones">Feature Phones</a><a href="#/r/phones">Tablets</a><a href="#/r/phones">Phones Accessories</a><a href="#/r/tv">Televisions</a><a href="#/r/tv">Audio</a><a href="#/r/tv">Cameras</a><a href="#/r/fashion">Men&apos;s Fashion</a><a href="#/r/fashion">Women&apos;s Fashion</a><a href="#/r/fashion">Shoes</a><a href="#/r/fashion">Bags</a><a href="#/r/home">Furniture</a><a href="#/r/home">Kitchen</a><a href="#/r/home">Bedding</a><a href="#/r/home">Appliances</a><a href="#/r/beauty">Skin Care</a><a href="#/r/beauty">Hair Care</a><a href="#/r/beauty">Makeup</a><a href="#/r/beauty">Perfumes</a><a href="#/r/computing">Laptops</a><a href="#/r/sport">Sporting Goods</a><a href="#/r/home">Baby Products</a><a href="#/r/toys">Toys &amp; Games</a><a href="#/r/games">Games &amp; Consoles</a><a href="#/r/other">Automotive</a><a href="#/r/super">Supermarket</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ft-bottom">
+      <div class="container ft-bottom-in">
+        <span>&copy; 2026 ShopOnlineUg. All Rights Reserved.</span>
+        <a href="#/info/Terms%20of%20Use">Terms of Use</a>
+        <a href="#/info/Privacy%20notice">Privacy Policy</a>
+        <a href="#/info/Cookie%20notice">Cookie Notice</a>
+        <a href="#/info/Security">Security</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<button class="to-top" id="toTop" type="button" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

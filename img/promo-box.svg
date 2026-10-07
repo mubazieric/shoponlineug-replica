@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="150" viewBox="0 0 280 150">
+  <rect x="4" y="4" width="272" height="142" rx="18" fill="#ffffff" opacity="0.96"/>
+  <rect x="16" y="18" width="64" height="22" rx="11" fill="#BE1D3E"/>
+  <text x="48" y="33" font-family="Ubuntu, Arial, sans-serif" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">FREE</text>
+  <text x="16" y="72" font-family="Ubuntu, Arial, sans-serif" font-size="20" font-weight="700" fill="#1D4ED8">Free Delivery</text>
+  <text x="16" y="96" font-family="Ubuntu, Arial, sans-serif" font-size="13" fill="#5a6070">on orders over 200K</text>
+  <text x="226" y="86" font-size="72" text-anchor="middle" dominant-baseline="central">&#128663;</text>
+</svg>
