@@ -31,6 +31,7 @@ function settings() {
     googleMapsApiKey: s.googleMapsApiKey || process.env.GOOGLE_MAPS_API_KEY || '',
     driverGpsRequired: s.driverGpsRequired !== false,
     driverRatingFloor: num(s.driverRatingFloor, 3.5),
+    driverRatingMinSample: Math.max(1, num(s.driverRatingMinSample, 5)),
     transportFee: num(s.transportFee, 3500),
     freeTransportThreshold: num(s.freeTransportThreshold, 500000),
     deliveryRadiusKm: num(s.deliveryRadiusKm, 60)
@@ -108,6 +109,50 @@ function summary(s, driverId) {
   return reviews.summary(reviews.published(s, { driverId: driverId }));
 }
 
+/*
+ * A driver whose published rating has fallen below the configured floor (once
+ * enough customers have rated them) is flagged. Flagged drivers keep their
+ * active jobs but cannot claim new ones until their rating recovers, which is
+ * the marketplace side of the trust balance.
+ */
+function lowRating(driver) {
+  var cfg = settings();
+  var r = driverRating(driver && driver.id);
+  var enough = r.count >= cfg.driverRatingMinSample;
+  var flagged = enough && r.rating > 0 && r.rating < cfg.driverRatingFloor;
+  return {
+    rating: r.rating,
+    count: r.count,
+    floor: cfg.driverRatingFloor,
+    minSample: cfg.driverRatingMinSample,
+    flagged: flagged
+  };
+}
+
+/*
+ * Central claim gate. Every path that attaches a driver to a delivery (driver
+ * self-claim and the advance() helper) goes through here so the same rules
+ * apply everywhere.
+ */
+function canClaim(storeRef, driver) {
+  if (!driver) return { ok: false, error: 'No driver profile is linked to this account.' };
+  if (driver.status !== 'approved') return { ok: false, error: 'Only approved drivers can claim deliveries.' };
+  if (settings().driverGpsRequired && driver.gpsEnabled === false) {
+    return { ok: false, error: 'Turn on location sharing in your profile before claiming deliveries.' };
+  }
+  var lr = lowRating(driver);
+  if (lr.flagged) {
+    return { ok: false, error: 'Your rating (' + lr.rating.toFixed(1) + ' of 5) is below the ' + lr.floor + ' minimum. Contact support to have your account reviewed.' };
+  }
+  return { ok: true };
+}
+
+function hasRecentLocation(storeRef, driverId, withinMs) {
+  var drv = (storeRef.drivers || []).find(function (d) { return d.id === driverId; });
+  if (!drv || !drv.lastPingAt) return false;
+  return Date.now() - drv.lastPingAt <= (withinMs || 30 * 60 * 1000);
+}
+
 function driverStats(s, driverId) {
   var list = (s.deliveries || []).filter(function (d) { return d.driverId === driverId; });
   var done = list.filter(function (d) { return d.status === 'delivered'; });
@@ -160,6 +205,37 @@ function publicDriver(d, s) {
     stats: st,
     createdAt: d.createdAt,
     reviewedAt: d.reviewedAt || null
+  };
+}
+
+/*
+ * Safe, PII-free view of a driver for the public "meet our riders" catalog.
+ * No phone, email, licence number, national ID, date of birth or live
+ * coordinates - those never leave the server unless the driver is your own.
+ */
+function catalogDriver(d, s) {
+  s = s || store();
+  if (!d) return null;
+  var r = driverRating(d.id);
+  var st = driverStats(s, d.id);
+  return {
+    id: d.id,
+    name: d.name,
+    vehicleType: d.vehicleType || '',
+    numberPlate: d.numberPlate || '',
+    status: d.status,
+    rating: r.rating,
+    ratingCount: r.count,
+    ratingDistribution: r.distribution,
+    gpsEnabled: d.gpsEnabled !== false,
+    lastPingAt: d.lastPingAt || null,
+    responseMs: d.responseMs || 0,
+    stats: {
+      delivered: st.delivered,
+      onTime: st.onTime,
+      avgRating: st.avgRating
+    },
+    createdAt: d.createdAt
   };
 }
 
@@ -341,20 +417,41 @@ function ensureDelivery(storeRef, order) {
   return delivery;
 }
 
-function publicDelivery(d) {
+/*
+ * Customer contact details are only revealed to the driver who actually holds
+ * the job. While a delivery is still open in the marketplace we redact them so
+ * a browser can never scrape every shopper's phone number and home address.
+ */
+function publicDelivery(d, opts) {
+  opts = opts || {};
+  var redact = opts.redactCustomer === true;
+  var customerName = d.customerName;
+  var customerPhone = d.customerPhone;
+  var dropoffAddress = d.dropoffAddress;
+  var dropoffLat = d.dropoffLat;
+  var dropoffLng = d.dropoffLng;
+  if (redact) {
+    var first = String(d.customerName || 'Customer').trim().charAt(0).toUpperCase();
+    customerName = first ? first + '. (hidden until accepted)' : 'Customer';
+    customerPhone = null;
+    dropoffAddress = d.dropoffTown || d.dropoffRegion || 'Shown after you accept';
+    dropoffLat = null;
+    dropoffLng = null;
+  }
   return {
     id: d.id,
     orderId: d.orderId,
     orderNo: d.orderNo,
-    customerName: d.customerName,
-    customerPhone: d.customerPhone,
+    customerName: customerName,
+    customerPhone: customerPhone,
+    customerRedacted: !!redact,
     items: (d.items || []).map(function (it) { return { id: it.id, name: it.name, qty: it.qty, vendorId: it.vendorId }; }),
     pickupAddress: d.pickupAddress,
-    dropoffAddress: d.dropoffAddress,
+    dropoffAddress: dropoffAddress,
     dropoffTown: d.dropoffTown,
     dropoffRegion: d.dropoffRegion,
-    dropoffLat: d.dropoffLat,
-    dropoffLng: d.dropoffLng,
+    dropoffLat: dropoffLat,
+    dropoffLng: dropoffLng,
     status: d.status,
     statusLabel: statusLabel(d.status),
     driver: d.driverId ? { id: d.driverId, name: d.driverName, vehicleType: d.vehicleType, numberPlate: d.numberPlate } : null,
@@ -433,12 +530,28 @@ function advance(storeRef, deliveryId, status, opts) {
   if (opts.driverId && !delivery.driverId) {
     var drv = (storeRef.drivers || []).find(function (d) { return d.id === opts.driverId; });
     if (!drv) return { error: 'Driver not found.' };
-    if (drv.status !== 'approved') return { error: 'Only approved drivers can take deliveries.' };
+    if (opts.byRole === 'driver') {
+      var gate = canClaim(storeRef, drv);
+      if (!gate.ok) return { error: gate.error };
+    } else if (drv.status !== 'approved') {
+      return { error: 'Only approved drivers can take deliveries.' };
+    }
     delivery.driverId = drv.id;
     delivery.driverName = drv.name;
     delivery.vehicleType = drv.vehicleType || null;
     delivery.numberPlate = drv.numberPlate || null;
     drv.responseMs = responseMs(drv.id) || drv.responseMs || 0;
+  }
+
+  if (opts.byRole === 'driver' && ['picked', 'transit', 'arrived', 'delivered'].indexOf(status) !== -1) {
+    var active = (storeRef.drivers || []).find(function (d) { return d.id === delivery.driverId; });
+    if (active && settings().driverGpsRequired && active.gpsEnabled === false) {
+      return { error: 'Turn on location sharing before updating this delivery.' };
+    }
+  }
+
+  if (status === 'delivered' && delivery.transportPaidBy === 'customer' && opts.requireTransportPaid && !opts.transportPaid) {
+    return { error: 'Confirm that you collected the transport fee before marking this delivery as delivered.' };
   }
 
   delivery.status = status;
@@ -455,7 +568,7 @@ function advance(storeRef, deliveryId, status, opts) {
   if (status === 'picked') delivery.pickedAt = now;
   if (status === 'delivered') {
     delivery.deliveredAt = now;
-    delivery.transportPaid = delivery.transportPaidBy === 'platform' ? true : !!opts.transportPaid;
+    delivery.transportPaid = delivery.transportPaidBy === 'platform' ? true : (opts.transportPaid != null ? !!opts.transportPaid : !!delivery.transportPaid);
     if (delivery.driverPay == null) delivery.driverPay = Math.max(2500, Math.round(num(delivery.transportFee, 0) * 0.7));
     if (order && order.deliveryId == null) order.deliveryId = delivery.id;
     if (order) order.status = 'Delivered';
@@ -540,7 +653,11 @@ module.exports = {
   notifyDrivers: notifyDrivers,
   driverRating: driverRating,
   driverStats: driverStats,
+  lowRating: lowRating,
+  canClaim: canClaim,
+  hasRecentLocation: hasRecentLocation,
   publicDriver: publicDriver,
+  catalogDriver: catalogDriver,
   fullDriver: fullDriver,
   recordCompleteness: recordCompleteness,
   validate: validate,

@@ -226,6 +226,12 @@
   var CATALOG = buildCatalog();
   var BY_ID = {};
   CATALOG.forEach(function (p) { BY_ID[p.id] = p; });
+  Object.keys(PRODUCTS).forEach(function (key) {
+    PRODUCTS[key].forEach(function (p, i) {
+      if (!p.id) p.id = productId(key, i);
+      if (!p.key) p.key = key;
+    });
+  });
 
   var VARIANTS = ['Titanium Gray', 'Midnight Black', 'Ocean Blue', 'Silver', 'Rose Gold', 'Emerald Green', 'Sunset Orange', 'Pearl White'];
   var PAGE_IDS = ['homePage', 'catsPage', 'searchPage', 'browsePage', 'pdpPage', 'checkoutPage', 'successPage', 'infoPage', 'wishPage', 'storePage', 'ordersPage', 'accountPage', 'sellPage', 'vendorPage', 'adminPage', 'driverPage'];
@@ -1233,35 +1239,127 @@
   });
 
   /* ============ orders page ============ */
-  function renderOrders() {
+  /*
+   * Orders now live on the server. My Orders paints the server copy (which
+   * carries the live delivery status and rider) and falls back to any purely
+   * local/guest orders that were never synced.
+   */
+  var SERVER_ORDERS = [];
+  function serverOrderToLocal(so) {
+    return {
+      no: so.orderNo,
+      serverId: so.id,
+      ts: so.createdAt,
+      items: (so.items || []).map(function (it) { return { id: it.id, qty: it.qty, name: it.name, img: it.img, price: it.price }; }),
+      total: so.total,
+      name: so.name, phone: so.phone, region: so.region, town: so.town, addr: so.addr,
+      pay: so.pay, payMethod: so.payMethod, payStatus: so.payStatus,
+      status: so.status, deliveryStatus: so.deliveryStatus
+    };
+  }
+  function loadServerOrders() {
+    if (!SERVER_USER) { SERVER_ORDERS = []; return Promise.resolve(); }
+    return api('/orders').then(function (d) { SERVER_ORDERS = d.orders || []; }).catch(function () {});
+  }
+  function serverStage(o) {
+    if (o.status === 'Delivered') return 4;
+    if (o.status === 'Cancelled') return 0;
+    var map = { approved: 1, assigned: 2, picked: 2, transit: 3, arrived: 3, delivered: 4, cancelled: 0 };
+    var key = o.deliveryStatus || (o.delivery && o.delivery.status);
+    if (map[key] != null) return map[key];
+    return o.status === 'Approved' ? 1 : 0;
+  }
+  function combinedOrders() {
+    var seen = {};
+    var out = SERVER_ORDERS.map(function (so) {
+      seen[so.id] = true;
+      return {
+        server: true, id: so.id, no: so.orderNo, ts: so.createdAt, items: so.items, total: so.total,
+        name: so.name, phone: so.phone, region: so.region, town: so.town, addr: so.addr,
+        pay: so.pay, payMethod: so.payMethod, payStatus: so.payStatus,
+        status: so.status, deliveryStatus: so.deliveryStatus, delivery: so.delivery, stage: serverStage(so)
+      };
+    });
+    ORDERS.forEach(function (o) {
+      if (o.serverId && seen[o.serverId]) return;
+      out.push({ local: true, no: o.no, ts: o.ts, items: o.items, total: o.total, name: o.name, phone: o.phone, region: o.region, town: o.town, addr: o.addr, pay: o.pay, payMethod: o.payMethod, payStatus: o.payStatus, stage: stageFor(o) });
+    });
+    return out;
+  }
+  function paintOrders() {
     var list = document.getElementById('ordersList');
     var empty = document.getElementById('ordersEmpty');
-    document.getElementById('ordersN').textContent = ORDERS.length + ' order' + (ORDERS.length === 1 ? '' : 's');
-    if (!ORDERS.length) { list.innerHTML = ''; empty.hidden = false; return; }
+    var orders = combinedOrders();
+    document.getElementById('ordersN').textContent = orders.length + ' order' + (orders.length === 1 ? '' : 's');
+    if (!orders.length) {
+      list.innerHTML = '';
+      empty.hidden = false;
+      document.getElementById('ordersEmpty').innerHTML = SERVER_USER
+        ? '<h3>No orders yet</h3><p>When you place an order it will show up here with live delivery tracking.</p><a class="btn _prim" href="#/">Start shopping</a>'
+        : '<h3>No orders yet</h3><p>Sign in to see your orders across devices, or place an order to track it here.</p><a class="btn _prim" href="#/">Start shopping</a>';
+      return;
+    }
     empty.hidden = true;
-    list.innerHTML = ORDERS.map(function (o) {
-      var stage = stageFor(o);
-      var items = o.items.map(function (it) { return { p: BY_ID[it.id], qty: it.qty }; }).filter(function (x) { return x.p; });
+    list.innerHTML = orders.map(function (o) {
+      var stage = o.stage != null ? o.stage : stageFor(o);
+      var items = (o.items || []).map(function (it) {
+        return { p: BY_ID[it.id] || { id: it.id, img: it.img || 'prod-home', name: it.name || 'Item', price: it.price || 0 }, qty: it.qty };
+      }).filter(function (x) { return x.p; });
       var steps = STAGES.map(function (s, i) {
         var cls = i < stage ? 'done' : (i === stage ? 'active' : '');
         return '<div class="tstep ' + cls + '"><span class="tdot"></span><span class="tlbl">' + s + '</span></div>';
       }).join('');
+      var d = o.delivery;
+      var driverLine = '';
+      if (d && d.driver) {
+        driverLine = '<div class="order-driver">Rider: <b>' + esc(d.driver.name || 'Assigned') + '</b>' +
+          (d.driver.vehicleType ? ' · ' + esc(d.driver.vehicleType) : '') +
+          (d.driver.numberPlate ? ' · ' + esc(d.driver.numberPlate) : '') + '</div>';
+      }
+      var rateLine = '';
+      if (o.server && o.deliveryStatus === 'delivered' && d && d.driver) {
+        if (d.rating) {
+          rateLine = '<div class="order-rate _done">You rated this delivery ' + '&#9733;'.repeat(Math.max(1, Math.min(5, d.rating))) + '</div>';
+        } else {
+          rateLine = '<div class="order-rate" data-oid="' + esc(o.id) + '"><span>Rate your rider:</span>' +
+            [1, 2, 3, 4, 5].map(function (n) { return '<button type="button" class="rate-star" data-rating="' + n + '" title="' + n + ' star' + (n === 1 ? '' : 's') + '">&#9733;</button>'; }).join('') +
+            '</div>';
+        }
+      }
       return '<div class="order">' +
-        '<div class="order-h"><div><span class="order-no">#' + o.no + '</span><span class="order-date">' + dateStr(o.ts) + '</span></div>' +
+        '<div class="order-h"><div><span class="order-no">#' + esc(o.no) + '</span><span class="order-date">' + dateStr(o.ts) + '</span></div>' +
         '<span class="order-total">' + fmt(o.total) + '</span></div>' +
         '<div class="order-items">' + items.map(function (x) {
-          return '<a class="oi" href="#/p/' + x.p.id + '">' + imgTag(x.p.img, '', '', false, x.p.id) + '<span>' + x.p.name + '</span><i>×' + x.qty + '</i></a>';
+          return '<a class="oi" href="#/p/' + x.p.id + '">' + imgTag(x.p.img, '', '', false, x.p.id) + '<span>' + esc(stripHtml(x.p.name)) + '</span><i>×' + x.qty + '</i></a>';
         }).join('') + '</div>' +
         '<div class="track">' +
           '<div class="track-bar"><div class="track-fill" style="width:' + (stage / 4 * 100) + '%"></div></div>' +
           '<div class="track-steps">' + steps + '</div>' +
-          '<div class="track-eta">' + (stage >= 4 ? 'Delivered on ' + etaStr(o.ts, 2) : 'Estimated delivery: ' + etaStr(o.ts, 2)) + ' · Pay: ' + esc(o.pay || 'Pay on Delivery') +
+          '<div class="track-eta">' + (stage >= 4 ? 'Delivered' : 'Estimated delivery: ' + etaStr(o.ts, 2)) + ' · Pay: ' + esc(o.pay || 'Pay on Delivery') +
             (o.payStatus === 'Paid' ? ' · <span class="pbadge _approved" style="font-size:11px;vertical-align:middle">Paid</span>' : ' · <span class="pbadge _pending" style="font-size:11px;vertical-align:middle">Pending</span>') + '</div>' +
         '</div>' +
+        driverLine + rateLine +
         '<div class="order-foot">Deliver to ' + esc(o.name || 'Customer') + ' · ' + esc(o.town || o.region || 'Kampala') + ' · ' + esc(o.phone || '') + '</div>' +
       '</div>';
     }).join('');
   }
+  function renderOrders() {
+    paintOrders();
+    loadServerOrders().then(function () { if (!document.getElementById('ordersPage').hidden) paintOrders(); });
+  }
+  document.addEventListener('click', function (e) {
+    var star = e.target.closest('.rate-star');
+    if (!star) return;
+    var wrap = star.closest('.order-rate');
+    if (!wrap) return;
+    var oid = wrap.getAttribute('data-oid');
+    var rating = parseInt(star.getAttribute('data-rating'), 10) || 5;
+    wrap.innerHTML = '<span class="rate-star-spin"></span>Submitting your rating…';
+    api('/orders/' + encodeURIComponent(oid) + '/rate-driver', { method: 'POST', body: { rating: rating, text: rating >= 4 ? 'Great delivery service.' : 'Delivery could be improved.' } })
+      .then(function () { showToast('Thanks for rating your rider'); return loadServerOrders(); })
+      .then(function () { paintOrders(); })
+      .catch(function (err) { showToast(apiFail(err, 'Rating')); paintOrders(); });
+  });
 
   /* ============ account page ============ */
   function renderAccount() {
@@ -1525,37 +1623,59 @@
     var payRow = $('.pay-row.on');
     var payVal = payRow ? payRow.getAttribute('data-pay') : 'pod';
     var payLabel = payRow ? (payRow.querySelector('b') || {}).textContent || 'Cash' : 'Pay on Delivery';
-    function buildOrder(payStatus) {
-      return {
+    var contact = {
+      name: document.getElementById('coName').value,
+      phone: document.getElementById('coPhone').value,
+      region: document.getElementById('coRegion').value,
+      town: document.getElementById('coTown').value,
+      addr: document.getElementById('coAddr').value
+    };
+    function localOrder(payStatus) {
+      return Object.assign({
         no: 'UG' + Math.floor(100000000 + Math.random() * 899999999),
         ts: Date.now(),
         items: items,
         total: total,
-        name: document.getElementById('coName').value,
-        phone: document.getElementById('coPhone').value,
-        region: document.getElementById('coRegion').value,
-        town: document.getElementById('coTown').value,
-        addr: document.getElementById('coAddr').value,
         pay: payLabel,
         payMethod: payVal,
         payStatus: payStatus
-      };
+      }, contact);
     }
-    function finalize(o) {
+    function done(o) {
       addOrder(o);
       cart = [];
       saveCart(); updateBadge(); renderDrawer();
       location.hash = '#/success/' + o.no;
     }
+    var placeBtn = document.getElementById('coPlace');
+    function finalize(payStatus) {
+      if (!SERVER_USER) { done(localOrder(payStatus)); return; }
+      placeBtn.disabled = true;
+      api('/orders', {
+        method: 'POST',
+        body: {
+          items: items.map(function (it) { return { id: it.id, qty: it.qty }; }),
+          name: contact.name, phone: contact.phone, region: contact.region, town: contact.town, addr: contact.addr,
+          pay: payLabel, payMethod: payVal, payStatus: payStatus
+        }
+      }).then(function (d) {
+        placeBtn.disabled = false;
+        if (d && d.order) done(serverOrderToLocal(d.order)); else done(localOrder(payStatus));
+        loadServerOrders().then(function () { if (!document.getElementById('ordersPage').hidden) paintOrders(); });
+      }).catch(function (e) {
+        placeBtn.disabled = false;
+        showToast(apiFail(e, 'Order'));
+      });
+    }
     if (payVal === 'mtn' || payVal === 'airtel') {
-      renderMomoPrompt(payLabel, total, function () { finalize(buildOrder('Paid')); });
+      renderMomoPrompt(payLabel, total, function () { finalize('Paid'); });
       return;
     }
     if (payVal === 'card') {
-      renderCardPrompt(total, function () { finalize(buildOrder('Paid')); });
+      renderCardPrompt(total, function () { finalize('Paid'); });
       return;
     }
-    finalize(buildOrder('Pending'));
+    finalize('Pending');
   });
 
   /* ============ info pages ============ */
@@ -1748,9 +1868,9 @@
       CATALOG.length = 0;
       Array.prototype.push.apply(CATALOG, keep);
       VENDOR_IDS = [];
-      PRODUCTS.vendor = (d.products || []).map(function (vp, i) {
+      PRODUCTS.vendor = (d.products || []).map(function (vp) {
         var entry = {
-          id: productId('vendor', i), key: 'vendor', brand: brandFor(vp.name),
+          id: vp.id, key: 'vendor', serverId: vp.id, brand: brandFor(vp.name),
           img: vp.img || 'prod-home', name: vp.name, price: vp.price,
           old: vp.old && vp.old > vp.price ? vp.old : vp.price,
           rate: vp.rate || 4.5, sold: vp.sold || 0, loc: vp.loc || 'Kampala',
@@ -2364,7 +2484,8 @@
             '<td>' + esc(d.vehicleType) + '<div class="mi-meta">' + esc(d.numberPlate) + '</div></td>' +
             '<td><span class="pbadge _' + esc(d.status === 'approved' ? 'approved' : d.status === 'pending' ? 'pending' : d.status === 'suspended' ? 'suspended' : 'rejected') + '">' + esc(d.status) + '</span>' +
             (d.hasDocuments ? '<div class="mi-meta">documents on file</div>' : '<div class="mi-meta">documents missing</div>') + '</td>' +
-            '<td class="num">' + (d.stats ? d.stats.delivered : 0) + ' done<br><span class="mi-meta">' + (d.rating && d.rating.rating ? d.rating.rating.toFixed(1) + ' / 5' : 'no ratings') + '</span></td>' +
+            '<td class="num">' + (d.stats ? d.stats.delivered : 0) + ' done<br><span class="mi-meta">' + (d.rating && d.rating.rating ? d.rating.rating.toFixed(1) + ' / 5' : 'no ratings') + '</span>' +
+            (d.ratingFlag && d.ratingFlag.flagged ? '<div class="pbadge _rejected" style="margin-top:4px">below floor</div>' : '') + '</td>' +
             '<td><div class="row-actions">' + acts + '</div>' +
             (d.documents && d.documents.license ? '<div class="mi-meta"><a href="' + esc(d.documents.license) + '" target="_blank" rel="noopener">licence</a> &middot; ' : '') +
             (d.documents && d.documents.nationalId ? '<a href="' + esc(d.documents.nationalId) + '" target="_blank" rel="noopener">national ID</a> &middot; ' : '') +
@@ -2372,16 +2493,38 @@
         }).join('') + '</tbody></table></div>'
       : '<div class="empty-note">No riders have applied yet. Point customers to the rider portal at #/driver.</div>';
 
+    var nextMap = { approved: 'assigned', assigned: 'picked', picked: 'transit', transit: 'arrived', arrived: 'delivered' };
+    var nextLabel = { picked: 'Picked up', transit: 'On the way', arrived: 'Arrived', delivered: 'Delivered' };
+    var approvedRiders = ADMIN.drivers.filter(function (x) { return x.status === 'approved'; });
     var dels = ADMIN.deliveries.length
-      ? '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Order</th><th>Drop-off</th><th>Rider</th><th>Status</th><th>Transport</th></tr></thead><tbody>' +
+      ? '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Order</th><th>Drop-off</th><th>Rider</th><th>Status</th><th>Transport</th><th>Actions</th></tr></thead><tbody>' +
         ADMIN.deliveries.map(function (d) {
+          var acts = '';
+          if (d.status === 'approved' && !d.assignedDriverId) {
+            acts = '<div class="row-actions adm-dispatch">' +
+              '<select data-adlc-sel="' + esc(d.id) + '"><option value="">Choose rider&hellip;</option>' +
+              approvedRiders.map(function (x) {
+                var low = x.ratingFlag && x.ratingFlag.flagged ? ' (low rating)' : '';
+                return '<option value="' + esc(x.id) + '">' + esc(x.name) + low + '</option>';
+              }).join('') + '</select>' +
+              '<button class="btn _sm _prim" type="button" data-adlc="assign" data-id="' + esc(d.id) + '">Assign</button></div>';
+          } else if (d.status !== 'delivered' && d.status !== 'cancelled') {
+            var nxt = nextMap[d.status];
+            acts = '<div class="row-actions">' +
+              (nxt ? '<button class="btn _sm _prim" type="button" data-adlc="advance" data-status="' + nxt + '" data-id="' + esc(d.id) + '">' + nextLabel[nxt] + '</button>' : '') +
+              '<button class="btn _sm _danger" type="button" data-adlc="advance" data-status="cancelled" data-id="' + esc(d.id) + '">Cancel</button></div>';
+          } else {
+            acts = '<span class="mi-meta">' + (d.status === 'delivered' ? (d.transportPaid ? 'completed' : 'fee pending') : 'closed') + '</span>';
+          }
           return '<tr><td class="num">#' + esc(d.orderNo || d.orderId || '') + '<div class="mi-meta">' + esc(d.customerName || '') + '<br>' + esc(d.customerPhone || '') + '</div></td>' +
             '<td>' + esc(d.dropoffAddress || '') + '<div class="mi-meta">' + esc(d.dropoffTown || '') + '</div></td>' +
             '<td>' + (d.driver ? esc(d.driver.name) : '<span class="mi-meta">unassigned</span>') +
-            (d.numberPlate ? '<div class="mi-meta">' + esc(d.numberPlate) + ' &middot; ' + esc(d.vehicleType || '') + '</div>' : '') + '</td>' +
+            (d.numberPlate ? '<div class="mi-meta">' + esc(d.numberPlate) + ' &middot; ' + esc(d.vehicleType || '') + '</div>' : '') +
+            (d.driverRatingFlag && d.driverRatingFlag.flagged ? '<div class="pbadge _rejected" style="margin-top:4px">below floor</div>' : '') + '</td>' +
             '<td><span class="pbadge _' + esc(d.status === 'delivered' ? 'approved' : d.status === 'cancelled' ? 'rejected' : d.status === 'approved' ? 'pending' : 'processing') + '">' + esc(d.statusLabel || d.status) + '</span>' +
             (d.etaAt ? '<div class="mi-meta">ETA ' + esc(new Date(d.etaAt).toLocaleString('en-GB')) + '</div>' : '') + '</td>' +
-            '<td class="num">' + fmt(d.transportFee || 0) + '<div class="mi-meta">' + esc(d.transportPaidBy || '') + (d.transportPaid ? ' paid' : '') + '</div></td></tr>';
+            '<td class="num">' + fmt(d.transportFee || 0) + '<div class="mi-meta">' + esc(d.transportPaidBy || '') + (d.transportPaid ? ' paid' : '') + '</div></td>' +
+            '<td>' + acts + '</td></tr>';
         }).join('') + '</tbody></table></div>'
       : '<div class="empty-note">No deliveries yet. Deliveries are created automatically when an order is approved or packed.</div>';
 
@@ -2569,6 +2712,34 @@
       api('/admin/drivers/' + adrv.getAttribute('data-id') + '/status', { method: 'POST', body: { status: adrv.getAttribute('data-adrv') } })
         .then(function () { showToast('Rider status updated'); ADMIN.deliveryLoaded = false; loadAdminDelivery(); })
         .catch(function (err) { showToast(apiFail(err, 'Rider status')); });
+      return;
+    }
+    var adlc = e.target.closest('[data-adlc]');
+    if (adlc) {
+      var did = adlc.getAttribute('data-id');
+      var action = adlc.getAttribute('data-adlc');
+      var payload = {};
+      if (action === 'assign') {
+        var sel = document.querySelector('[data-adlc-sel="' + did + '"]');
+        if (!sel || !sel.value) { showToast('Choose a rider first'); return; }
+        payload = { status: 'assigned', driverId: sel.value };
+      } else {
+        payload = { status: adlc.getAttribute('data-status') };
+      }
+      var send = function (body) {
+        return api('/admin/deliveries/' + did + '/status', { method: 'PUT', body: body })
+          .then(function () { showToast('Delivery updated'); ADMIN.deliveryLoaded = false; loadAdminDelivery(); })
+          .catch(function (err) { showToast(apiFail(err, 'Delivery')); });
+      };
+      if (payload.status === 'delivered') {
+        if (!window.confirm('Mark this delivery as delivered?')) return;
+        var dlv = (ADMIN.deliveries || []).filter(function (x) { return x.id === did; })[0];
+        if (dlv && dlv.transportPaidBy === 'customer' && !dlv.transportPaid) {
+          payload.transportPaid = window.confirm('Has the transport fee been collected from the customer? Click OK to mark it collected.');
+        }
+      }
+      if (payload.status === 'cancelled' && !window.confirm('Cancel this delivery? It will return to the pool.')) return;
+      send(payload);
       return;
     }
     var ap = e.target.closest('[data-ap]');
@@ -2867,9 +3038,12 @@
     var rating = (m.rating && m.rating.rating) || d.rating || 0;
     var statusLbl = { pending: 'awaiting approval', approved: 'approved', rejected: 'rejected', suspended: 'suspended' }[d.status] || d.status;
     var note = '';
+    var cfgS = m.settings || {};
     if (d.status === 'pending') note = '<div class="pending-note">Your application is <b>awaiting approval</b>. You can browse open jobs, but claiming unlocks once an admin approves your records.</div>';
     if (d.status === 'rejected') note = '<div class="pending-note">Your application was not approved. ' + esc(d.rejectionReason || 'Contact support for details.') + '</div>';
     if (d.status === 'suspended') note = '<div class="pending-note">Your rider account is suspended. Contact support@shoponline.ug.</div>';
+    if (d.status === 'approved' && d.gpsEnabled === false && cfgS.driverGpsRequired) note += '<div class="pending-note">Location sharing is <b>off</b>. Turn it on under <b>My profile</b> to claim and complete deliveries.</div>';
+    if (m.ratingFlag && m.ratingFlag.flagged) note += '<div class="pending-note">Your rating (' + Number(m.ratingFlag.rating || 0).toFixed(1) + ' / 5) is below the ' + esc(String(m.ratingFlag.floor)) + ' minimum. New job claims are paused - contact support to have your account reviewed.</div>';
 
     body.innerHTML = '<div class="portal-hero drv-hero"><h1>' + esc(d.name || 'Rider') +
       ' <span class="pbadge _' + esc(d.status) + '">' + esc(statusLbl) + '</span></h1>' +
@@ -2903,6 +3077,12 @@
     panel.innerHTML = driverJobsHtml();
   }
 
+  function claimBlockReason() {
+    var m = DRIVER_UI.me || {};
+    if (m.canClaim && m.canClaim.ok === false) return m.canClaim.error || 'You cannot claim jobs right now.';
+    return null;
+  }
+
   function driverJobsHtml() {
     var j = DRIVER_UI.jobs;
     if (!j) return '<div class="empty-note">Loading jobs&hellip;</div>';
@@ -2914,8 +3094,10 @@
       html += '<div class="card"><h3>Your active job' + (active.length === 1 ? '' : 's') + '</h3>' +
         active.map(function (d) { return driverJobCard(d, true); }).join('') + '</div>';
     }
+    var block = claimBlockReason();
     html += '<div class="card"><h3>Open pickups (' + open.length + ')</h3>' +
-      '<p class="card-sub">Jobs waiting for a rider. Claim one to lock it to your account.</p>' +
+      '<p class="card-sub">Jobs waiting for a rider. Customer contact details stay hidden until you accept.</p>' +
+      (block ? '<div class="pending-note">' + esc(block) + '</div>' : '') +
       (open.length ? open.map(function (d) { return driverJobCard(d, false); }).join('')
         : '<div class="empty-note">No open pickups right now. We will alert you when a vendor packs an order.</div>') +
       '</div>';
@@ -2954,8 +3136,10 @@
       (isActive
         ? (step ? '<button class="btn _sm _prim" type="button" data-dadv="' + step.status + '" data-id="' + esc(d.id) + '">' + step.label + '</button>' : '') +
           '<button class="btn _sm _danger" type="button" data-dadv="cancelled" data-id="' + esc(d.id) + '">Cancel</button>'
-        : '<button class="btn _sm _prim" type="button" data-dclaim="' + esc(d.id) + '">Claim this job</button>' +
-          (d.dropoffLat ? '<a class="btn _sm _ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + d.dropoffLat + ',' + d.dropoffLng + '">Directions</a>' : '')) +
+        : (claimBlockReason()
+          ? '<button class="btn _sm _prim" type="button" disabled>Claiming paused</button>'
+          : '<button class="btn _sm _prim" type="button" data-dclaim="' + esc(d.id) + '">Claim this job</button>' +
+            (d.dropoffLat ? '<a class="btn _sm _ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=' + d.dropoffLat + ',' + d.dropoffLng + '">Directions</a>' : ''))) +
       '</div></div>';
   }
 
@@ -3046,11 +3230,19 @@
     var status = btn.getAttribute('data-dadv');
     var id = btn.getAttribute('data-id');
     if (DRIVER_UI.busy) return;
-    if (status === 'delivered' && !window.confirm('Confirm you handed the order over to the customer.')) return;
+    var job = ((DRIVER_UI.jobs && DRIVER_UI.jobs.active) || []).filter(function (x) { return x.id === id; })[0];
+    var transportPaid = false;
+    if (status === 'delivered') {
+      if (!window.confirm('Confirm you handed the order over to the customer.')) return;
+      if (job && job.transportPaidBy === 'customer' && !job.transportPaid) {
+        if (!window.confirm('Collect the transport fee of ' + fmt(job.transportFee || 0) + ' from the customer.\n\nClick OK once you have collected it.')) return;
+        transportPaid = true;
+      }
+    }
     if (status === 'cancelled' && !window.confirm('Cancel this delivery? It will return to the open pool.')) return;
     DRIVER_UI.busy = true;
     btn.disabled = true;
-    api('/delivery/jobs/' + id + '/advance', { method: 'POST', body: { status: status, confirmHandover: status === 'delivered' } })
+    api('/delivery/jobs/' + id + '/advance', { method: 'POST', body: { status: status, confirmHandover: status === 'delivered', transportPaid: transportPaid } })
       .then(function (r) {
         DRIVER_UI.busy = false;
         showToast('Delivery marked <b>' + esc((r.delivery && r.delivery.statusLabel) || status) + '</b>');

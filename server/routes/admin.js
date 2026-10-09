@@ -288,6 +288,7 @@ router.get('/drivers', function (req, res) {
     .map(function (d) {
       return Object.assign(delivery.fullDriver(d), {
         rating: delivery.driverRating(d.id),
+        ratingFlag: delivery.lowRating(d),
         stats: delivery.driverStats(store, d.id)
       });
     })
@@ -313,7 +314,7 @@ router.post('/drivers', auth.requireRole('admin'), function (req, res) {
   const draft = Object.assign({}, b, { email: b.email || '', userId: null, appliedVia: 'admin' });
   const checked = delivery.validate(draft);
   const completeness = delivery.recordCompleteness(checked.values);
-  if (checked.errors) return res.status(400).json({ error: checked.errors[0], errors: checked.errors });
+  if (checked.errors.length) return res.status(400).json({ error: checked.errors[0], errors: checked.errors });
 
   const now = Date.now();
   const driver = Object.assign({
@@ -387,10 +388,12 @@ router.get('/deliveries', function (req, res) {
       customerPhone: o ? o.phone : null,
       town: o ? o.town : null,
       addr: o ? o.addr : null,
-      vendorName: drv ? drv.name : null,
+      assignedDriverId: d.driverId || null,
+      driverName: drv ? drv.name : null,
       vehicleType: drv ? drv.vehicleType : null,
       numberPlate: drv ? drv.numberPlate : null,
-      driverPhone: drv ? drv.phone : null
+      driverPhone: drv ? drv.phone : null,
+      driverRatingFlag: drv ? delivery.lowRating(drv) : null
     });
   }).sort(function (a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); });
 
@@ -414,10 +417,13 @@ router.get('/deliveries', function (req, res) {
 
 router.put('/deliveries/:id/status', function (req, res) {
   const store = db.load();
-  var out = delivery.advance(store, req.params.id, String((req.body || {}).status || ''), {
+  var body = req.body || {};
+  var out = delivery.advance(store, req.params.id, String(body.status || ''), {
     by: req.user.email,
     byRole: 'admin',
-    note: (req.body || {}).note ? String(req.body.note).slice(0, 200) : null
+    note: body.note ? String(body.note).slice(0, 200) : null,
+    driverId: body.driverId || null,
+    transportPaid: body.transportPaid != null ? !!body.transportPaid : undefined
   });
   if (out.error) return res.status(out.status || 400).json({ error: out.error });
   log('admin.delivery.status', req, { deliveryId: out.delivery.id, status: out.delivery.status });
@@ -437,7 +443,7 @@ const SETTINGS_WHITELIST = [
   'siteName', 'tagline', 'currencyCode', 'deliveryFee', 'freeThreshold',
   'bannerStripVisible', 'dealPopupVisible', 'themeAccent',
   'transportFee', 'freeTransportThreshold', 'deliveryRadiusKm', 'googleMapsApiKey',
-  'driverGpsRequired', 'driverRatingFloor', 'vendorRatingFloor'
+  'driverGpsRequired', 'driverRatingFloor', 'driverRatingMinSample', 'vendorRatingFloor'
 ];
 
 router.get('/settings', function (req, res) {
@@ -470,6 +476,7 @@ router.put('/settings', function (req, res) {
   if (b.deliveryRadiusKm !== undefined) store.settings.deliveryRadiusKm = Math.max(1, Math.round(Number(b.deliveryRadiusKm) || 25));
   if (b.driverGpsRequired !== undefined) store.settings.driverGpsRequired = !!b.driverGpsRequired;
   if (b.driverRatingFloor !== undefined) store.settings.driverRatingFloor = Math.min(5, Math.max(0, Number(b.driverRatingFloor) || 0));
+  if (b.driverRatingMinSample !== undefined) store.settings.driverRatingMinSample = Math.min(100, Math.max(1, Math.round(Number(b.driverRatingMinSample) || 5)));
   if (b.vendorRatingFloor !== undefined) store.settings.vendorRatingFloor = Math.min(5, Math.max(0, Number(b.vendorRatingFloor) || 0));
   log('admin.settings.update', req, { keys: SETTINGS_WHITELIST.filter(function (k) { return b[k] !== undefined; }) });
   db.saveNow();
@@ -544,6 +551,7 @@ function publicSettings(s) {
     googleMapsApiKey: s.googleMapsApiKey || '',
     driverGpsRequired: s.driverGpsRequired !== false,
     driverRatingFloor: s.driverRatingFloor != null ? s.driverRatingFloor : 3.5,
+    driverRatingMinSample: s.driverRatingMinSample != null ? s.driverRatingMinSample : 5,
     vendorRatingFloor: s.vendorRatingFloor != null ? s.vendorRatingFloor : 3.5,
     bannerStripVisible: s.bannerStripVisible !== false, dealPopupVisible: s.dealPopupVisible !== false,
     themeAccent: s.themeAccent || '#2563EB'
@@ -554,6 +562,7 @@ function SETTINGS_DEFAULTS() {
   base.googleMapsApiKey = '';
   base.driverGpsRequired = true;
   base.driverRatingFloor = 3.5;
+  base.driverRatingMinSample = 5;
   base.vendorRatingFloor = 3.5;
   return base;
 }

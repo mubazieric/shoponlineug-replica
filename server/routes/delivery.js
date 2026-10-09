@@ -16,6 +16,8 @@ router.get('/config', function (req, res) {
     config: {
       googleMapsApiKey: cfg.googleMapsApiKey,
       driverGpsRequired: cfg.driverGpsRequired,
+      driverRatingFloor: cfg.driverRatingFloor,
+      driverRatingMinSample: cfg.driverRatingMinSample,
       transportFee: cfg.transportFee,
       freeTransportThreshold: cfg.freeTransportThreshold,
       deliveryRadiusKm: cfg.deliveryRadiusKm
@@ -31,7 +33,7 @@ router.get('/catalog', function (req, res) {
   var store = db.load();
   var drivers = (store.drivers || [])
     .filter(function (d) { return d.status === 'approved'; })
-    .map(function (d) { return delivery.publicDriver(d, store); })
+    .map(function (d) { return delivery.catalogDriver(d, store); })
     .sort(function (a, b) { return b.rating - a.rating; });
   res.json({ ok: true, drivers: drivers });
 });
@@ -47,8 +49,8 @@ router.post('/apply', auth.requireAuth, function (req, res) {
   if (clash) return res.status(409).json({ error: 'A driver application already exists for that phone number.' });
 
   var draft = Object.assign({}, b, { email: b.email || req.user.email, userId: req.user.id });
-  var checked = delivery.validate(draft);
-  if (checked.errors) return res.status(400).json({ error: checked.errors[0], errors: checked.errors, missing: checked.errors });
+  var checked = delivery.validate(draft, { skipDocs: true });
+  if (checked.errors.length) return res.status(400).json({ error: checked.errors[0], errors: checked.errors, missing: checked.errors });
 
   var docMap = { license: 'licenseFile', nationalId: 'nationalIdFile', selfie: 'selfieFile' };
   var docs = {};
@@ -62,6 +64,11 @@ router.post('/apply', auth.requireAuth, function (req, res) {
     docs[docMap[key]] = saved;
   });
   if (docErrors.length) return res.status(400).json({ error: docErrors[0], errors: docErrors });
+  var docMissing = [];
+  if (!docs.licenseFile) docMissing.push("Upload your driver's licence.");
+  if (!docs.nationalIdFile) docMissing.push('Upload your National ID.');
+  if (!docs.selfieFile) docMissing.push('Take a selfie so we can verify your identity.');
+  if (docMissing.length) return res.status(400).json({ error: docMissing[0], errors: docMissing, missing: docMissing });
 
   var now = Date.now();
   var driver = Object.assign({
@@ -109,6 +116,8 @@ router.get('/me', auth.requireAuth, requireDriver, function (req, res) {
     completeness: delivery.recordCompleteness(req.driver),
     stats: delivery.driverStats(store, req.driver.id),
     rating: delivery.driverRating(req.driver.id),
+    ratingFlag: delivery.lowRating(req.driver),
+    canClaim: delivery.canClaim(store, req.driver),
     settings: delivery.settings()
   });
 });
@@ -128,8 +137,13 @@ router.put('/me', auth.requireAuth, requireDriver, function (req, res) {
     licenseExpiry: b.licenseExpiry != null ? b.licenseExpiry : d.licenseExpiry,
     nationalIdNo: b.nationalIdNo != null ? b.nationalIdNo : d.nationalIdNo
   };
-  var checked = delivery.validate(draft);
-  if (checked.errors) return res.status(400).json({ error: checked.errors[0], errors: checked.errors });
+  var checked = delivery.validate(draft, { skipDocs: true });
+  if (checked.errors.length) return res.status(400).json({ error: checked.errors[0], errors: checked.errors });
+
+  var clash = delivery.findByPhone(checked.values.phone);
+  if (clash && clash.id !== d.id) {
+    return res.status(409).json({ error: 'That phone number is already used by another driver account.' });
+  }
 
   var wasApproved = d.status === 'approved';
   var completeness = delivery.recordCompleteness({
@@ -199,9 +213,9 @@ router.get('/jobs', auth.requireAuth, requireDriver, function (req, res) {
 
   res.json({
     ok: true,
-    active: active.map(delivery.publicDelivery),
-    open: open.map(delivery.publicDelivery),
-    history: done.sort(function (a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); }).slice(0, 40).map(delivery.publicDelivery),
+    active: active.map(function (d) { return delivery.publicDelivery(d); }),
+    open: open.map(function (d) { return delivery.publicDelivery(d, { redactCustomer: true }); }),
+    history: done.sort(function (a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); }).slice(0, 40).map(function (d) { return delivery.publicDelivery(d); }),
     stats: delivery.driverStats(store, req.driver.id),
     unread: delivery.notifications().filter(function (n) { return n.toDriverId === req.driver.id && n.status === 'unread'; }).length
   });
@@ -212,6 +226,8 @@ router.post('/jobs/:id/claim', auth.requireAuth, requireDriver, function (req, r
   var d = delivery.findDelivery(store, req.params.id);
   if (!d) return res.status(404).json({ error: 'Delivery not found.' });
   if (d.status !== 'approved' || d.driverId) return res.status(409).json({ error: 'Another driver has already taken this delivery.' });
+  var gate = delivery.canClaim(store, req.driver);
+  if (!gate.ok) return res.status(403).json({ error: gate.error });
   var busy = (store.deliveries || []).filter(function (x) {
     return x.driverId === req.driver.id && ['assigned', 'picked', 'transit', 'arrived'].indexOf(x.status) !== -1;
   }).length;
@@ -247,12 +263,16 @@ router.post('/jobs/:id/advance', auth.requireAuth, requireDriver, function (req,
   if (status === 'delivered' && !b.confirmHandover) {
     return res.status(400).json({ error: 'Confirm the handover with the customer before marking delivered.' });
   }
+  if (status === 'delivered' && d.transportPaidBy === 'customer' && !b.transportPaid) {
+    return res.status(400).json({ error: 'Confirm that you collected the transport fee before marking delivered.' });
+  }
   var out = delivery.advance(store, d.id, status, {
     by: req.user.email,
     byRole: 'driver',
     note: b.note ? String(b.note).slice(0, 200) : null,
     lat: b.lat != null ? Number(b.lat) : null,
     lng: b.lng != null ? Number(b.lng) : null,
+    requireTransportPaid: true,
     transportPaid: !!b.transportPaid
   });
   if (out.error) return res.status(409).json({ error: out.error });
@@ -313,7 +333,7 @@ router.get('/driver/:id', function (req, res) {
   var store = db.load();
   var d = (store.drivers || []).find(function (x) { return x.id === req.params.id; });
   if (!d) return res.status(404).json({ error: 'Driver not found.' });
-  res.json({ ok: true, driver: delivery.publicDriver(d, store) });
+  res.json({ ok: true, driver: delivery.catalogDriver(d, store) });
 });
 
 module.exports = router;

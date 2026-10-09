@@ -13,6 +13,7 @@ const PORT = parseInt(process.env.PORT || '3000', 10);
 const ROOT = path.join(__dirname, '..');
 
 app.disable('x-powered-by');
+app.locals.root = ROOT;
 
 const UPLOAD_PATHS = /^\/api\/(delivery|reviews|vendors|admin|orders)(\/|$)/;
 
@@ -74,7 +75,11 @@ app.use(function (err, req, res, next) {
   });
 });
 
-app.listen(PORT, function () {
-  console.log('ShopOnlineUg server running: http://localhost:' + PORT);
-  require('./mailer').initMailer();
-});
+if (require.main === module) {
+  app.listen(PORT, function () {
+    console.log('ShopOnlineUg server running: http://localhost:' + PORT);
+    require('./mailer').initMailer();
+  });
+}
+
+module.exports = app;

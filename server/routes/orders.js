@@ -3,6 +3,7 @@
 const express = require('express');
 const auth = require('../auth');
 const cats = require('../categories');
+const catalog = require('../catalog');
 const db = require('../db');
 const delivery = require('../delivery');
 
@@ -54,10 +55,17 @@ router.post('/', auth.requireAuth, function (req, res) {
   var rawItems = Array.isArray(b.items) ? b.items : [];
   var items = [];
   rawItems.forEach(function (it) {
-    var p = (store.products || []).find(function (x) { return x.id === it.id; });
-    if (!p || p.status !== 'approved') return;
+    if (!it || it.id == null) return;
     var qty = Math.max(1, Math.min(99, parseInt(it.qty, 10) || 1));
-    items.push({ id: p.id, name: p.name, price: p.price, qty: qty, vendorId: p.vendorId || null, img: p.img || 'prod-home' });
+    var p = (store.products || []).find(function (x) { return x.id === it.id; });
+    if (p && p.status === 'approved') {
+      items.push({ id: p.id, name: p.name, price: p.price, qty: qty, vendorId: p.vendorId || null, img: p.img || 'prod-home' });
+      return;
+    }
+    var c = catalog.find(it.id);
+    if (c) {
+      items.push({ id: c.id, name: c.name, price: c.price, qty: qty, vendorId: null, img: c.img || 'prod-home', platform: true });
+    }
   });
   if (!items.length) errors.push('Your cart is empty or the items are no longer available.');
 
@@ -115,7 +123,23 @@ router.post('/', auth.requireAuth, function (req, res) {
     if (p) p.sold = (Number(p.sold) || 0) + it.qty;
   });
 
-  delivery.notifyCustomer(order, null, 'placed', 'Order placed', 'We received order ' + order.orderNo + '. The vendor will confirm shortly.');
+  delivery.notifyCustomer(order, null, 'placed', 'Order placed', 'We received order ' + order.orderNo + '. We are preparing it for delivery.');
+
+  /*
+   * Platform (ShopOnlineUg) stock can be fulfilled immediately: there is no
+   * vendor to confirm, so we auto-approve and drop a pickup job straight into
+   * the rider pool. Vendor orders stay "Pending" until the vendor confirms.
+   */
+  var platformOnly = items.every(function (it) { return !it.vendorId; });
+  if (platformOnly) {
+    order.status = 'Approved';
+    order.activity.push({ at: now, status: 'Approved', text: 'Order approved and queued for pickup.', by: 'system' });
+    var dlv = delivery.ensureDelivery(store, order);
+    order.deliveryId = dlv.id;
+    order.deliveryStatus = dlv.status;
+    var targets = delivery.notifyDrivers(dlv, order, 'Pickup available', 'Order ' + order.orderNo + ' is ready for pickup in ' + (dlv.pickupAddress || 'Kampala') + '.');
+    order.activity.push({ at: Date.now(), status: 'Approved', text: 'Delivery request broadcast to ' + targets + ' nearby rider' + (targets === 1 ? '' : 's') + '.', by: 'system' });
+  }
 
   store.logs.unshift({ id: auth.rid('l'), at: now, type: 'order.create', orderId: order.id, orderNo: order.orderNo, by: req.user.email, amount: order.total });
   db.saveNow();

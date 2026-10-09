@@ -35,6 +35,7 @@ const DEFAULT = {
     googleMapsApiKey: '',
     driverGpsRequired: true,
     driverRatingFloor: 3.5,
+    driverRatingMinSample: 5,
     deliveryRadiusKm: 60
   },
   meta: { seeded: false, createdAt: null }
